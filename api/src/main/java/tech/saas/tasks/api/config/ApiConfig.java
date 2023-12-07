@@ -7,13 +7,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import tech.saas.tasks.core.config.CoreConfig;
 
 @Configuration
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
-@Import(CoreConfig.class)
 @ComponentScan({
         "tech.saas.tasks.api.controllers",
         "tech.saas.tasks.api.exceptions",
         "tech.saas.tasks.api.converters"
 })
+@Import(CoreConfig.class)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class ApiConfig {
 
 

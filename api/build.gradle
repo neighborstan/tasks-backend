@@ -64,7 +64,7 @@ compileJava.dependsOn tasks.openApiGenerateApi
 sourceSets {
     main {
         java {
-            srcDir("$buildDir/generated/api/src/gen/java")
+            srcDirs += "$buildDir/generated/api/src/gen/java"
         }
     }
 }
