@@ -1,0 +1,85 @@
+version: '3.3'
+services:
+  pg_price:
+    image: postgis/postgis:15-3.3
+    container_name: pg_price
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=path_price
+      # Add extensions you need to be enabled by default in the DB. Default are the five specified below
+    #      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
+    healthcheck:
+      test: "PGPASSWORD=pass pg_isready -h 127.0.0.1 -U user -d path_price"
+
+  rmq_price:
+    image: rabbitmq:3.11.2-management
+    container_name: rmq_price
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pass
+      - RABBITMQ_DEFAULT_VHOST=/
+    entrypoint: docker-entrypoint.sh rabbitmq-server
+
+  price-assistant-api:
+    container_name: price-assistant-api
+    restart: on-failure
+    ports:
+      - '8080:8080'
+    depends_on:
+      - pg_price
+    image: dellinii/price-assistant
+    environment:
+      - SPRING_CONFIG_LOCATION=/app/application.yml
+    entrypoint:
+      - java
+      - -XX:InitialRAMPercentage=75
+      - -XX:MaxRAMPercentage=75
+      - -Xss256k
+      - -Dconfig.override_with_env_vars=true
+      - -Djava.security.egd=file:/dev/./urandom
+      - -jar
+      - /app/price-assistant-api.jar
+
+  price-assistant-watcher:
+    container_name: price-assistant-watcher
+    restart: on-failure
+    depends_on:
+      - rmq_price
+      - pg_price
+    image: dellinii/price-assistant
+    environment:
+      - SPRING_CONFIG_LOCATION=/app/application.yml
+    entrypoint:
+      - java
+      - -XX:InitialRAMPercentage=75
+      - -XX:MaxRAMPercentage=75
+      - -Xss256k
+      - -Dconfig.override_with_env_vars=true
+      - -Djava.security.egd=file:/dev/./urandom
+      - -jar
+      - /app/price-assistant-watcher.jar
+
+  trends-job:
+    container_name: trends-job
+    restart: on-failure
+    depends_on:
+      - rmq_price
+      - pg_price
+    image: dellinii/price-assistant
+    environment:
+      - SPRING_CONFIG_LOCATION=/app/application.yml
+    entrypoint:
+      - java
+      - -XX:InitialRAMPercentage=75
+      - -XX:MaxRAMPercentage=75
+      - -Xss256k
+      - -Dconfig.override_with_env_vars=true
+      - -Djava.security.egd=file:/dev/./urandom
+      - -jar
+      - /app/trends-job.jar
