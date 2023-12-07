@@ -1,0 +1,21 @@
+server:
+  forward-headers-strategy: framework
+  port: 8080
+
+spring:
+  config:
+    import: 'file:./core/src/main/resources/application.yaml'
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "https://demo.traffic.online/oauth2/jwks"
+
+management:
+  health:
+    defaults:
+      enabled: false
+  endpoint:
+    health:
+      probes:
+        enabled: true

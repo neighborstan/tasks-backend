@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "$springBootVersion"
+}
+
+group rootProject.group
+version rootProject.version
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+    }
+}
+
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+
+dependencies {
+    implementation project(":core")
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+
+    implementation "ch.qos.logback:logback-classic"
+    implementation "io.sentry:sentry-logback"
+
+    implementation "org.springframework.boot:spring-boot-starter-amqp"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+bootJar {
+    archiveFileName = "watcher.jar"
+    exclude("application.yml")
+}

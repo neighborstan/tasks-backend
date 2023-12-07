@@ -1,0 +1,18 @@
+server:
+  forward-headers-strategy: framework
+  port: 8080
+
+spring:
+  liquibase:
+    enabled: true
+    change-log: 'classpath:db/changelog.xml'
+    default-schema: 'public'
+  datasource:
+    url: jdbc:postgresql://10.206.128.105:5000/tasks_demo
+    username: u_tasks_demo
+    password: Aegh4dee
+    driverClassName: org.postgresql.Driver
+    hikari:
+      schema: 'public'
+  cache:
+    type: simple

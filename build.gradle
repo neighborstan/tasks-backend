@@ -1,0 +1,110 @@
+buildscript {
+    ext {
+        gitPropertiesVersion = '2.4.1'
+        springVersion = '6.1.1'
+        springBootVersion = '3.2.0'
+        springDependencyManagement = '1.1.4'
+        springRabbitVersion = '3.1.0'
+        springdocOpenapiVersion = "2.2.0"
+        springOAuthVersion = '3.2.0'
+
+        prometheusVersion = '1.12.0'
+
+        logbackVersion = '1.4.5'
+        sentryVersion = '6.13.1'
+
+        jacksonVersion = '2.16.0'
+        lombokVersion = '1.18.30'
+        openapiGeneratorVersion = '6.2.0'
+
+        postgresVersion = '42.7.0'
+        liquibaseVersion = '4.25.0'
+
+        testcontainersVersion = '1.17.6'
+        jupiterVersion = '5.8.0'
+        junitVersion = '4.13.2'
+        mockserverVersion = '5.11.2'
+        mockitoVersion = '4.6.1'
+    }
+
+    repositories {
+        maven { url "https://nexus.bia-tech.ru/repository/repo.spring.io/" }
+        maven { url "https://nexus.bia-tech.ru/repository/plugins.gradle.org/" }
+    }
+
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagement"
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:$gitPropertiesVersion"
+    }
+
+}
+
+allprojects {
+
+    repositories {
+        maven { url "https://nexus.bia-tech.ru/repository/maven-central/" }
+    }
+
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: "com.gorylenko.gradle-git-properties"
+
+    dependencyManagement {
+        dependencies {
+
+            dependency "org.projectlombok:lombok:$lombokVersion"
+
+            dependency "ch.qos.logback:logback-classic:$logbackVersion"
+            dependency "io.sentry:sentry-spring-boot-starter:$sentryVersion"
+            dependency "io.sentry:sentry-spring-boot-starter-jakarta:$sentryVersion"
+            dependency "io.sentry:sentry-logback:$sentryVersion"
+
+            dependency "org.springframework:spring-core:$springVersion"
+            dependency "org.springframework:spring-jdbc:$springVersion"
+            dependency "org.springframework:spring-context:$springVersion"
+            dependency "org.springframework:spring-web:$springVersion"
+            dependency "org.springframework:spring-webmvc:$springVersion"
+
+            dependency "org.apache.poi:poi:5.2.5"
+            dependency "org.apache.poi:poi-ooxml:5.2.5"
+
+            dependency "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+            dependency "io.micrometer:micrometer-registry-prometheus:$prometheusVersion"
+
+            dependency "org.springframework.boot:spring-boot-starter-cache:$springBootVersion"
+            dependency "org.springframework.boot:spring-boot-starter-data-redis:$springBootVersion"
+
+            dependency "org.springframework.boot:spring-boot-starter-data-jdbc:$springBootVersion"
+            dependency "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
+
+            dependency "org.springframework.amqp:spring-rabbit:$springRabbitVersion"
+            dependency "org.springframework.boot:spring-boot-starter:$springBootVersion"
+            dependency "org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springOAuthVersion"
+            dependency "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
+
+            dependency "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenapiVersion"
+
+            dependency "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+            dependency "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+            dependency "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+
+            dependency "org.postgresql:postgresql:$postgresVersion"
+            dependency "org.liquibase:liquibase-core:$liquibaseVersion"
+
+            // test
+            dependency "junit:junit:$junitVersion"
+            dependency "org.junit.jupiter:junit-jupiter:$jupiterVersion"
+            dependency "org.springframework:spring-test:$springVersion"
+
+            dependency "org.mockito:mockito-core:$mockitoVersion"
+            dependency "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+            dependency "org.mock-server:mockserver-netty:$mockserverVersion"
+            dependency "org.mock-server:mockserver-client-java:$mockserverVersion"
+
+        }
+    }
+}
+
+
+group 'tech.saas.tasks'
+version '1.0.0'
+

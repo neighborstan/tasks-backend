@@ -1,0 +1,105 @@
+variables:
+  GIT_DEPTH: 0
+
+image: $CI_BUILDER_IMAGE
+
+stages:
+  - push
+  - deploy
+
+push:
+  stage: push
+  tags:
+    - traffic
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+.deploy:
+  stage: deploy
+  interruptible: false
+  tags:
+    - traffic
+  script:
+    - |
+      jq -n \
+        --arg service "$CI_PROJECT_NAME" \
+        --arg registry "$CI_REGISTRY_IMAGE" \
+        --arg tag "$CI_COMMIT_SHORT_SHA" \
+        --arg sha "$CI_COMMIT_SHORT_SHA" \
+        --arg stage "$CI_ENVIRONMENT_NAME" \
+        --arg project "$CI_PROJECT_ID" \
+        '{ ref: "master", variables: [{ key: "TARGET_SERVICE", value: $service}, { key: "TARGET_REGISTRY_IMAGE", value: $registry}, { key: "TARGET_IMAGE_TAG", value: $tag }, { key: "TARGET_COMMIT_SHORT_SHA", value: $sha }, { key:"TARGET_ENVIRONMENT", value: $stage}, { key:"TARGET_PROJECT_ID", value: $project } ] }' > body.json
+      PIPELINE_ID=$( curl -v --request POST -o ./responce.json -H "PRIVATE-TOKEN: $CI_DEPLOYMENT_DEF_TOKEN" -H "Content-Type: application/json" --data @body.json --url "$CI_API_V4_URL/projects/$CI_DEPLOY_PROJECT_ID/pipeline" && cat ./responce.json | jq '.id' )
+      cat ./responce.json
+      echo CI_DEPLOYMENT_DEF_TOKEN $CI_DEPLOYMENT_DEF_TOKEN
+      echo DEPLOY_PROJECT_ID $DEPLOY_PROJECT_ID
+      echo PIPELINE_ID $PIPELINE_ID
+
+      while true; do
+        curl -s -H "PRIVATE-TOKEN: $CI_DEPLOYMENT_DEF_TOKEN"  --url "$CI_API_V4_URL/projects/$CI_DEPLOY_PROJECT_ID/pipelines/$PIPELINE_ID" > pipeline.json
+        STATUS=$( cat pipeline.json | jq -r '.status' )
+        echo $STATUS
+        case $STATUS in
+          success) exit 0;;
+          running|pending|created) sleep 5;;
+          failed|canceled|skipped|manual|*) exit 1;;
+         esac
+      done
+
+dev1.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: dev1.traffic.online
+  variables:
+    TARGET_STAGE: dev1
+
+dev2.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: dev2.traffic.online
+  variables:
+    TARGET_STAGE: dev2
+
+dev3.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: dev3.traffic.online
+  variables:
+    TARGET_STAGE: dev3
+
+dev4.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: dev4.traffic.online
+  variables:
+    TARGET_STAGE: dev4
+
+dev5.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: dev5.traffic.online
+  variables:
+    TARGET_STAGE: dev5
+
+traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: traffic.online
+
+demo.traffic.online:
+  extends: .deploy
+  when: manual
+  environment:
+    name: demo.traffic.online
+

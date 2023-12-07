@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: tasks-service
+  description: tasks-service
+  version: v1
+servers:
+  - url: http://localhost:8080/api/v1
+
+
+paths:
+  /tasks:
+    get:
+      operationId: get-tasks
+      summary: Получить список задач
+      tags:
+        - tasks
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+
+  /tasks/{id}/complete:
+    post:
+      operationId: complete-task
+      summary: Выполнить задачу
+      tags:
+        - tasks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: id
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          enum:
+            - READINESS_CHECK
+            - MOVEMENT_START
+            - WAYPOINT_REACH
+            - DOCKING_START
+            - DOCKING_END
+        start_instant:
+          type: string
+          format: date-time
+        status:
+          enum:
+            - PENDING
+            - ACTIVE
+            - DONE
+        payload:
+          type: object
+
+    Error:
+      description: Ошибка
+      title: Error
+      type: object
+      properties:
+        code:
+          description: Числовой код ошибки
+          type: integer
+          default: 400
+        error:
+          description: Класс ошибки
+          type: string
+        error_description:
+          description: Сообщение, раскрывающее причину возникновения ошибки или любая другая информация
+          type: string
+
+  responses:
+    BadRequest:
+      description: Неверные параметры запроса
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+
+    Unauthorized:
+      description: Невалидный токен, неверный логин или пароль
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+
+    Forbidden:
+      description: Нет прав на выполнение действия
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+
+    NotFound:
+      description: Объект не найден
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://demo.traffic.online/oauth2/authorize
+          tokenUrl: https://demo.traffic.online/oauth2/token
+          scopes:
+            tasks.get: Выполнение задания
+            tasks.edit: Получение заданий

@@ -1,0 +1,21 @@
+spring:
+  config:
+    import: 'file:./core/src/main/resources/application.yaml'
+  rabbitmq:
+    host: 10.206.128.20
+    username: tasks-service
+    password: tasks-service
+    virtual-host: /
+    port: 5672
+    listener:
+      type: simple
+      simple:
+        max-concurrency: 16
+        concurrency: 4
+        prefetch: 80
+
+services:
+  rabbit:
+    exchange: TRAFFIC_EXCHANGE
+    queue: TASKS-QUEUE
+
