@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.converters.PointConverter;
 import tech.saas.tasks.core.models.Shipping;
+import tech.saas.tasks.core.models.ShippingAssignedResourcesInner;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
 import tech.saas.tasks.core.models.TaskDto;
 import tech.saas.tasks.core.services.AssignmentService;
@@ -38,11 +39,22 @@ public class GenerateTasksUC {
         var resources =
                 shipping.getAssignedResources();
 
-        var drivers =
-                resources.stream()
-                        .flatMap(i -> i.getDriversIds().stream())
-                        .map(coreService::driver)
+        var actors =
+                Stream.concat(
+                                resources.stream()
+                                        .flatMap(i -> i.getDriversIds().stream())
+                                        .map(d -> coreService.driver(shipping.getCompanyId(), d))
+                                        .flatMap(d ->
+                                                d.getDriverSecretInfo().getPhones()
+                                                        .stream()
+                                        )
+                                        .distinct(),
+                                resources.stream()
+                                        .map(ShippingAssignedResourcesInner::getDriverContactInfo)
+                                        .distinct()
+                        )
                         .toList();
+
         var story =
                 List.of(
                         new TaskDto.Story(
@@ -53,12 +65,7 @@ public class GenerateTasksUC {
                 );
 
         var assignments =
-                drivers.stream()
-                        .flatMap(d ->
-                                d.getDriverSecretInfo().getPhones()
-                                        .stream()
-                        )
-                        .distinct()
+                actors.stream()
                         .map(p ->
                                 Map.entry(
                                         new TaskAssignmentDto(

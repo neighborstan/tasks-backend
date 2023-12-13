@@ -7,9 +7,10 @@ drop table tasks;
 create table if not exists tasks
 (
     id         uuid        not null primary key,
+    type       text        not null,
+    status     text        not null,
     pipeline   text        not null,
     author     text        not null,
-    status     text        not null,
     story      jsonb       not null,
     transition timestamptz not null,
     entity     jsonb       not null,

@@ -10,9 +10,9 @@ spring:
     listener:
       type: simple
       simple:
-        max-concurrency: 16
-        concurrency: 4
-        prefetch: 80
+        max-concurrency: 1
+        concurrency: 1
+        prefetch: 1
 
 services:
   rabbit:

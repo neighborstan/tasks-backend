@@ -1,5 +1,6 @@
 package tech.saas.tasks.watcher.processors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import tech.saas.tasks.core.uc.GenerateTasksUC;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -56,7 +58,8 @@ public class EventsProcessor {
     public void handleEvent(Message message) throws IOException {
 
         var body = new String(message.getBody(), StandardCharsets.UTF_8);
-        var shipping = mapper.readValue(body, Shipping.class);
+        var event = mapper.readValue(body, new TypeReference<Map<String, ?>>() {});
+        var shipping = mapper.convertValue(event.get("payload"), Shipping.class);
         var status = shipping.getStatus();
 
         if (!Objects.equals(status.getCodeName(), ShippingStatus.CodeNameEnum.TRIP_WAITING))

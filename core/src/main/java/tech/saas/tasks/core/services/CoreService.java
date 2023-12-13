@@ -37,14 +37,14 @@ public class CoreService {
         this.rest = rest;
     }
 
-    public Driver driver(UUID id) {
+    public Driver driver(UUID company, UUID id) {
 
         try {
             var headers = new HttpHeaders();
             headers.set("X-Internal-Authorization", token);
             var entity = new HttpEntity<>(headers);
             var path = UriComponentsBuilder.fromUriString(uri)
-                    .path(String.format("/api/v1/drivers/%s", id))
+                    .path(String.format("/api/v1/resources/%s/drivers/%s", company, id))
                     .build()
                     .toString();
             var response =

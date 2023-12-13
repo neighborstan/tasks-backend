@@ -136,7 +136,10 @@ components:
       properties:
         id:
           type: string
-          format: UUID
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
         shipping_request_info:
           $ref: '#/components/schemas/ShippingRequest'
         status:
@@ -174,7 +177,6 @@ components:
                   format: uuid
               driver_contact_info:
                 type: string
-                format: uuid
 
     Driver:
       type: object

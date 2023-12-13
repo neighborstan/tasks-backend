@@ -32,8 +32,8 @@ public class TaskRowMapper implements RowMapper<TaskDto> {
                     rs.getString("author"),
                     mapper.readValue(rs.getString("story"), new TypeReference<List<TaskDto.Story>>() {}),
                     rs.getTimestamp("transition").toInstant().atOffset(ZoneOffset.UTC),
-                    mapper.readValue(rs.getString("shipping"), new TypeReference<Object>() {}),
-                    mapper.readValue(rs.getString("payload"), RoutePointDto.class),
+                    mapper.readValue(rs.getString("entity"), new TypeReference<Object>() {}),
+                    mapper.readValue(rs.getString("payload"),new TypeReference<Object>() {}),
                     rs.getString("comment")
             );
         }

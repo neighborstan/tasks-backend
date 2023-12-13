@@ -48,7 +48,7 @@ public class TasksService {
     public Optional<TaskDto> get(UUID id) {
         return jdbc.query(
                         """
-                                select * from tasks where id = ?
+                                select * from tasks where id = :id
                                 """,
                         Map.ofEntries(Map.entry("id", id)),
                         taskRowMapper
@@ -62,8 +62,9 @@ public class TasksService {
             var map = new MapSqlParameterSource();
             map.addValue("id", task.getId());
             map.addValue("pipeline", task.getPipeline());
+            map.addValue("type", String.valueOf(task.getType()));
+            map.addValue("status", String.valueOf(task.getStatus()));
             map.addValue("author", task.getAuthor());
-            map.addValue("status", task.getStatus());
             map.addValue("story", mapper.writeValueAsString(task.getStory()));
             map.addValue("transition", Timestamp.from(task.getTransition().toInstant()));
             map.addValue("entity", mapper.writeValueAsString(task.getEntity()));
@@ -71,8 +72,8 @@ public class TasksService {
             map.addValue("comment", task.getComment());
 
             jdbc.update("""
-                            insert into tasks(id, pipeline, author, status, story, transition, entity, payload, comment)
-                            values (:id, :pipeline, :author, :status, :story::jsonb, :transition, :entity::jsonb, :payload::jsonb, :comment)
+                            insert into tasks(id, pipeline, type, status, author, story, transition, entity, payload, comment)
+                            values (:id, :pipeline, :type, :status, :author, :story::jsonb, :transition, :entity::jsonb, :payload::jsonb, :comment)
                             on conflict (id) do update set
                             pipeline = excluded.pipeline,
                             author = excluded.author,
