@@ -14,8 +14,10 @@ import tech.saas.tasks.core.services.UUIDGen;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component
@@ -29,7 +31,7 @@ public class GenerateTasksUC {
     private final UUIDGen uuidGen;
     private final Clock clock;
 
-    public List<TaskDto> apply(Shipping shipping) {
+    public List<TaskDto> apply(Shipping shipping, Map<String,?> raw) {
         var request =
                 shipping.getShippingRequestInfo();
 
@@ -47,12 +49,11 @@ public class GenerateTasksUC {
                                         .flatMap(d ->
                                                 d.getDriverSecretInfo().getPhones()
                                                         .stream()
-                                        )
-                                        .distinct(),
+                                        ),
                                 resources.stream()
                                         .map(ShippingAssignedResourcesInner::getDriverContactInfo)
-                                        .distinct()
                         )
+                        .distinct()
                         .toList();
 
         var story =
@@ -63,6 +64,8 @@ public class GenerateTasksUC {
                                 OffsetDateTime.now(clock)
                         )
                 );
+
+        var info = shipping.getShippingRequestInfo();
 
         var assignments =
                 actors.stream()
@@ -81,9 +84,9 @@ public class GenerateTasksUC {
                                                 "tasks-service",
                                                 story,
                                                 OffsetDateTime.now(clock),
-                                                shipping,
-                                                shipping,
-                                                ""
+                                                raw,
+                                                raw,
+                                                Objects.requireNonNullElse(info.getComment(), "")
                                         )
                                 )
                         )
@@ -106,8 +109,8 @@ public class GenerateTasksUC {
                                         String.valueOf(shipping.getId()),
                                         "tasks-service",
                                         story,
-                                        OffsetDateTime.now(clock),
-                                        shipping,
+                                        OffsetDateTime.now(clock).plusMinutes(5),
+                                        raw,
                                         pointConverter.apiToCore(p),
                                         ""
                                 ),
@@ -118,8 +121,8 @@ public class GenerateTasksUC {
                                         String.valueOf(shipping.getId()),
                                         "tasks-service",
                                         story,
-                                        OffsetDateTime.now(clock),
-                                        shipping,
+                                        OffsetDateTime.now(clock).plusMinutes(10),
+                                        raw,
                                         pointConverter.apiToCore(p),
                                         ""
                                 ),
@@ -130,8 +133,8 @@ public class GenerateTasksUC {
                                         String.valueOf(shipping.getId()),
                                         "tasks-service",
                                         story,
-                                        OffsetDateTime.now(clock),
-                                        shipping,
+                                        OffsetDateTime.now(clock).plusMinutes(15),
+                                        raw,
                                         pointConverter.apiToCore(p),
                                         ""
                                 ),
@@ -142,8 +145,8 @@ public class GenerateTasksUC {
                                         String.valueOf(shipping.getId()),
                                         "tasks-service",
                                         story,
-                                        OffsetDateTime.now(clock),
-                                        shipping,
+                                        OffsetDateTime.now(clock).plusMinutes(20),
+                                        raw,
                                         pointConverter.apiToCore(p),
                                         ""
                                 )

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -40,8 +41,8 @@ public class RoutePointDto {
     @JsonProperty("cargo_packing")
     private String cargoPacking;
 
-    @JsonProperty("cargo_name")
-    private String cargoName;
+    @JsonProperty("cargo_description")
+    private String cargoDescription;
 
     @JsonProperty("operations")
     private List<String> operations;
@@ -60,6 +61,13 @@ public class RoutePointDto {
 
     @JsonProperty("counter_agent")
     private CounterAgent counterAgent;
+
+    @JsonProperty("cargo_receiver_sender_address")
+    private String cargoReceiverSenderAddress;
+
+    @JsonProperty("cargo_receiver_sender_info")
+    private CargoReceiverSenderInfo cargoReceiverSenderInfo;
+
 
     @Getter
     @Setter
@@ -233,5 +241,34 @@ public class RoutePointDto {
         private String timezone;
     }
 
+    @Getter
+    @Setter
+    public static class CargoReceiverSenderInfo {
+
+        @JsonProperty("phone")
+        private String phone;
+        @JsonProperty("extension_number")
+        private String extensionNumber;
+        @JsonProperty("company_name")
+        private String companyName;
+        @JsonProperty("contact_name")
+        private String contactName;
+        @JsonProperty("contact_inn")
+        private String contactInn;
+        @JsonProperty("contact_kpp")
+        private String contactKpp;
+        @JsonProperty("contact_opf_name")
+        private String contactOpfName;
+        @JsonProperty("passport_number")
+        private String passportNumber;
+
+        @JsonProperty("passport_issued_at")
+        private LocalDate passportIssuedAt;
+        @JsonProperty("passport_who_issued")
+        private String passportWhoIssued;
+        @JsonProperty("address")
+        private String address;
+
+    }
 
 }

@@ -1,6 +1,7 @@
 HELP.md
 pg-data-pa
 .gradle
+ignore/*
 /home
 build/
 */build/

@@ -12,23 +12,21 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.models.Shipping;
-import tech.saas.tasks.core.models.ShippingStatus;
+import tech.saas.tasks.core.uc.CancelTasksUC;
 import tech.saas.tasks.core.uc.GenerateTasksUC;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Clock;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Component
 @AllArgsConstructor
 public class EventsProcessor {
 
-    private final GenerateTasksUC generateTasksUC;
     private final ObjectMapper mapper;
-    private final Clock clock;
+    private final GenerateTasksUC generateTasksUC;
+    private final CancelTasksUC cancelTasksUC;
 
     @RabbitListener(
             bindings = {
@@ -62,10 +60,19 @@ public class EventsProcessor {
         var shipping = mapper.convertValue(event.get("payload"), Shipping.class);
         var status = shipping.getStatus();
 
-        if (!Objects.equals(status.getCodeName(), ShippingStatus.CodeNameEnum.TRIP_WAITING))
-            return;
+        switch (status.getCodeName()) {
+            case DONE, APPROVAL_WAITING, RESOURCES_WAITING -> {
+            }
 
-        generateTasksUC.apply(shipping);
+            case IN_WAY, TRIP_WAITING ->
+                    generateTasksUC.apply(shipping, mapper.convertValue(event.get("payload"), new TypeReference<Map<String, ?>>() {}));
+
+            case CANCELED,
+                    CANCELED_BY_CARGO_OWNING_COMPANY,
+                    CANCELED_BY_TRANSPORT_COMPANY,
+                    FAILED_BY_CARGO_OWNING_COMPANY,
+                    FAILED_BY_TRANSPORT_COMPANY -> cancelTasksUC.apply(shipping);
+        }
 
     }
 }

@@ -9,26 +9,31 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.saas.tasks.core.converters.TasksConverter;
 import tech.saas.tasks.core.controllers.TasksApi;
 import tech.saas.tasks.core.models.Task;
+import tech.saas.tasks.core.uc.CompleteTasksUC;
 import tech.saas.tasks.core.uc.GetTasksUC;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
 public class TasksController implements TasksApi {
 
     private final GetTasksUC getTasksUC;
+    private final CompleteTasksUC completeTasksUC;
     private final TasksConverter tasksConverter;
 
-    private final Clock clock;
 
 
-    @Override
     @PreAuthorize("hasAuthority('SCOPE_driver')")
-    public ResponseEntity<Task> completeTask(String id, OffsetDateTime instant) {
-        return null;
+    public ResponseEntity<Task> completeTask(UUID id, OffsetDateTime instant) {
+        var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var jwt = auth.getToken();
+        var phone = jwt.getClaimAsString("phone");
+
+        return ResponseEntity.ok(tasksConverter.coreToApi(completeTasksUC.apply(phone, id, instant)));
     }
 
     @Override

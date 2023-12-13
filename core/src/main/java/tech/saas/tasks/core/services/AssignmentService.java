@@ -3,13 +3,10 @@ package tech.saas.tasks.core.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
-import tech.saas.tasks.core.models.TaskDto;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +23,7 @@ public class AssignmentService {
 
     public Optional<TaskAssignmentDto> assignment(UUID task, String actor) {
         return jdbc.query(
-                        """
-                                select * from assignment where task = :task and actor = :actor
-                                """,
+                        "select * from assignment where task = :task and actor = :actor",
                         Map.ofEntries(
                                 Map.entry("task", task),
                                 Map.entry("actor", actor)
@@ -37,6 +32,14 @@ public class AssignmentService {
                 )
                 .stream()
                 .findFirst();
+    }
+
+    public List<TaskAssignmentDto> assignment(UUID task) {
+        return jdbc.query(
+                "select * from assignment where task = :task",
+                Map.ofEntries(Map.entry("task", task)),
+                rowMapper
+        );
     }
 
     public TaskAssignmentDto persist(TaskAssignmentDto assignment) {
@@ -54,5 +57,18 @@ public class AssignmentService {
                 )
         );
         return assignment(assignment.getTask(), assignment.getActor()).orElseThrow();
+    }
+
+    public void delete(TaskAssignmentDto assignment) {
+        jdbc.update(
+                """
+                        delete from assignment
+                        where task = :task and actor = :actor
+                        """,
+                Map.ofEntries(
+                        Map.entry("task", assignment.getTask()),
+                        Map.entry("actor", assignment.getActor())
+                )
+        );
     }
 }

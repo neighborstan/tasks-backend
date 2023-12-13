@@ -42,6 +42,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
           description: id
         - name: instant
           in: query
@@ -158,7 +159,6 @@ components:
                 - canceled_by_cargo_owning_company
                 - failed_by_transport_company
                 - failed_by_cargo_owning_company
-
         assigned_resources:
           type: array
           items:
@@ -205,13 +205,12 @@ components:
             - shipping_request
             - city_delivery
             - contract
-
-
         route_points:
           type: array
           items:
             $ref: '#/components/schemas/RoutePoint'
-
+        comment:
+          type: string
 
     RoutePoint:
       description: Точка маршрута
@@ -259,7 +258,7 @@ components:
           format: float
         cargo_packing:
           type: string
-        cargo_name:
+        cargo_description:
           type: string
         operations:
           description: Виды работ в точке маршрута
@@ -293,6 +292,34 @@ components:
         counter_agent:
           $ref: '#/components/schemas/CounterAgent'
           nullable: true
+        cargo_receiver_sender_address:
+          type: string
+        cargo_receiver_sender_info:
+          type: object
+          properties:
+            phone:
+              type: string
+            extension_number:
+              type: string
+            company_name:
+              type: string
+            contact_name:
+              type: string
+            contact_inn:
+              type: string
+            contact_kpp:
+              type: string
+            contact_opf_name:
+              type: string
+            passport_number:
+              type: string
+            passport_issued_at:
+              type: string
+              format: date
+            passport_who_issued:
+              type: string
+            address:
+              type: string
 
     CounterAgent:
       description: Контактное лицо ГО/ГП
@@ -425,7 +452,6 @@ components:
           description: Полная стоимость за услугу с учётом количества
           minimum: 0
           maximum: 999999999
-
 
     Location:
       description: Адресный объект заказа
