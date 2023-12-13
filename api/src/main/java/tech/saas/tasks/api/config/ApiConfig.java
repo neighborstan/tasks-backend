@@ -13,7 +13,7 @@ import tech.saas.tasks.core.config.CoreConfig;
         "tech.saas.tasks.api.converters"
 })
 @Import(CoreConfig.class)
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class ApiConfig {
 
 

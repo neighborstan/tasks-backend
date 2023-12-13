@@ -43,6 +43,12 @@ paths:
           schema:
             type: string
           description: id
+        - name: instant
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: Ok
@@ -59,23 +65,55 @@ components:
         id:
           type: string
           format: uuid
+        author:
+          type: string
         type:
-          enum:
-            - READINESS_CHECK
-            - MOVEMENT_START
-            - WAYPOINT_REACH
-            - DOCKING_START
-            - DOCKING_END
-        start_instant:
+          $ref: '#/components/schemas/TaskType'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        story:
+          type: array
+          items:
+            $ref: '#/components/schemas/Story'
+        transition:
           type: string
           format: date-time
-        status:
-          enum:
-            - PENDING
-            - ACTIVE
-            - DONE
+        entity:
+          type: object
+          properties: {}
+        comment:
+          type: string
         payload:
           type: object
+          properties:  {}
+
+    TaskType:
+      type: string
+      enum:
+        - READINESS_CHECK
+        - MOVEMENT_START
+        - WAYPOINT_REACH
+        - DOCKING_START
+        - DOCKING_END
+
+    TaskStatus:
+      type: string
+      enum:
+        - PENDING
+        - ACTIVE
+        - DONE
+        - CANCELED
+
+    Story:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        author:
+          type: string
+        instant:
+          type: string
+          format: date-time
 
     Error:
       description: Ошибка
@@ -92,6 +130,582 @@ components:
         error_description:
           description: Сообщение, раскрывающее причину возникновения ошибки или любая другая информация
           type: string
+
+    Shipping:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        shipping_request_info:
+          $ref: '#/components/schemas/ShippingRequest'
+        status:
+          type: object
+          properties:
+            code_name:
+              type: string
+              enum:
+                - approval_waiting
+                - resources_waiting
+                - trip_waiting
+                - in_way
+                - done
+                - canceled
+                - canceled_by_transport_company
+                - canceled_by_cargo_owning_company
+                - failed_by_transport_company
+                - failed_by_cargo_owning_company
+
+        assigned_resources:
+          type: array
+          items:
+            type: object
+            properties:
+              car_id:
+                type: string
+                format: uuid
+              trailer_id:
+                type: string
+                format: uuid
+              drivers_ids:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+              driver_contact_info:
+                type: string
+                format: uuid
+
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        driver_secret_info:
+          type: object
+          properties:
+            phones:
+              type: array
+              items:
+                type: string
+
+    ShippingRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        type:
+          type: string
+          enum:
+            - delivery
+            - shipping_request
+            - city_delivery
+            - contract
+
+
+        route_points:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutePoint'
+
+
+    RoutePoint:
+      description: Точка маршрута
+      type: object
+      properties:
+        id:
+          type: integer
+        car_supply_ranges:
+          description: >-
+            Даты подачи автомобиля:
+              * Фиксированное время (сегодня в 15 часов): массив с одним интервалом, даты подачи ОТ и ДО совпадают
+              * Интервал в рамках одного дня (сегодня с 15 до 17 часов): массив с одним интервалом, даты подачи ОТ и ДО находятся в рамках одного дня по часовому поясу точки маршрута
+              * Интервал в рамках нескольких дней (сегодня с 15 до 24 часов, завтра с 00 до 06 часов): массив с двумя интервалами. В первом даты подачи за первый день по часовомоу поясу точки маршрута, во втором за второй
+
+            Можно комбинировать несколько разных интервалов для получения требуемых результатов
+          type: array
+          items:
+            description: Интервал подачи автомобиля
+            type: object
+            properties:
+              from:
+                description: Дата подачи автомобиля - ОТ
+                type: string
+                format: date-time
+              till:
+                description: Дата подачи автомобиля - ДО
+                type: string
+                format: date-time
+        location:
+          $ref: '#/components/schemas/Location'
+        cargo_height:
+          type: number
+          format: float
+        cargo_length:
+          type: number
+          format: float
+        cargo_places:
+          type: integer
+          format: float
+        cargo_volume:
+          type: number
+          format: float
+        cargo_tonnage:
+          type: number
+          format: float
+        cargo_packing:
+          type: string
+        cargo_name:
+          type: string
+        operations:
+          description: Виды работ в точке маршрута
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [ loading, unloading, paperwork ]
+        operations_loadings:
+          description: Типы загрузок для работ в точке маршрута
+          type: array
+          items:
+            description: Тип растентовки
+            type: string
+            enum: [ full, rear, lateral, upper ]
+        operations_duration:
+          description: Длительность работ в точке маршрута в минутах
+          type: integer
+          minimum: 10
+          maximum: 2879
+        additional_services:
+          description: Дополнительные услуги в точке маршрута
+          type: array
+          items:
+            $ref: "#/components/schemas/AdditionalService"
+        contacts:
+          description: Контактные лица в точке маршрута
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        counter_agent:
+          $ref: '#/components/schemas/CounterAgent'
+          nullable: true
+
+    CounterAgent:
+      description: Контактное лицо ГО/ГП
+      type: object
+      properties:
+        private_person:
+          description: Является ли контакт физическим лицом
+          type: boolean
+        legal_entity_title:
+          description: Название юридического лица
+          type: string
+          nullable: true
+        legal_entity_inn:
+          description: ИНН юридического лица
+          type: string
+          nullable: true
+        legal_entity_kpp:
+          description: КПП юридического лица
+          type: string
+          nullable: true
+        legal_entity_opf_name:
+          description: ОПФ юридического лица
+          type: string
+          nullable: true
+        private_person_full_name:
+          description: ФИО физического лица
+          type: string
+          nullable: true
+        private_person_passport_type:
+          description: >-
+            Тип документа:
+              * passport - Пасспорт РФ
+              * driver_license - водительское удостоверение РФ
+              * international_passport - Загранпаспорт РФ
+              * military_identity - Военный билет РФ
+              * ussr_passport - Пасспорт СССР
+              * identity_kazakhstan - уд. личности РК
+              * foreign_citizen_passport - паспорт иностранного гражданина
+              * sailor_passport - паспорт моряка
+              * refuge_request_certificate - свидетельство о рассмотрении ходатайства о признании беженцем на территории РФ
+              * service_passport - служебный паспорт
+              * diplomatic_passport - дипломатический паспорт
+              * residence_request - вид на жительство лица без гражданства
+              * temporary_refuge_certificate - свидетельство о предоставлении временного убежища
+              * foreign_driver_license - водительское удостоверение иностранного гражданина
+          type: string
+          enum: [ passport, driver_license international_passport military_identity ussr_passport identity_kazakhstan foreign_citizen_passport sailor_passport refuge_request_certificate service_passport diplomatic_passport residence_request temporary_refuge_certificate foreign_driver_license ]
+          nullable: true
+        private_person_passport_number:
+          description: Серия и номер паспорта физического лица
+          type: string
+          nullable: true
+        private_person_passport_issuer:
+          description: Кем выдан паспорт физического лица
+          type: string
+          nullable: true
+        private_person_passport_issued_at:
+          description: Дата выдачи паспорта физического лица
+          type: string
+          format: date
+          nullable: true
+        private_person_passport_info:
+          description: Тип и номер документа
+          type: string
+          format: date
+          nullable: true
+          readOnly: true
+
+    Contact:
+      description: Контактное лицо в точке маршрута
+      type: object
+      properties:
+        full_name:
+          description: ФИО контактного лица
+          type: string
+          nullable: true
+        phone:
+          description: Телефон контактного лица
+          type: string
+          nullable: true
+          minLength: 11
+          maxLength: 16
+          pattern: '^\+?\d{11,15}$'
+        extension_number:
+          description: Добавочный номер
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 6
+          pattern: '^\d+$'
+        passport_number:
+          description: Номер паспорта
+          type: string
+          nullable: true
+        passport_issued_at:
+          description: Дата выдачи паспорта
+          type: string
+          format: date-time
+          nullable: true
+        passport_who_issued:
+          description: Кем выдан паспорт
+          type: string
+          nullable: true
+
+    AdditionalService:
+      type: object
+      title: AdditionalService
+      description: Дополнительная услуга
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >-
+            Идентификатор услуги:
+              * `6cda189f-5112-4a86-a68e-eb57a15a3f66` - ПРР (грузчики)
+              * `612a65de-c07d-414a-934a-84c269961fbe` - ПРР (манипулятор)
+              * `78580c63-94af-4693-9476-9204e3ca9332` - ПРР (кран)
+              * `f2c01a64-5b7d-4015-b5de-543fdff4260d` - Подъём на этаж
+              * `fb5814ca-9878-4bf8-9739-47700d4e4b46` - Пересчёт мест
+        name:
+          type: string
+          description: Наименование дополнительной услуги
+        count:
+          type: integer
+          description: Количество единиц услуги
+          minimum: 1
+          maximum: 999999999
+        price:
+          type: integer
+          description: Полная стоимость за услугу с учётом количества
+          minimum: 0
+          maximum: 999999999
+
+
+    Location:
+      description: Адресный объект заказа
+      title: Location
+      type: object
+      properties:
+        country:
+          description: Название страны
+          type: string
+          readOnly: true
+          example: Россия
+        country_iso_code:
+          description: ISO 3166-1 alpha-2 код страны
+          type: string
+          readOnly: true
+          example: RU
+
+        federal_district:
+          description: Название федерального округа. Заполняется не всегда даже для российских адресов
+          type: string
+          readOnly: true
+          nullable: true
+          example: Северо-Западный
+
+        region:
+          description: Регион. Может быть на английском языке для нероссийских адресов
+          type: string
+          readOnly: true
+          example: Санкт-Петербург
+        region_type:
+          description: Тип региона. Может отсутствовать для нероссийских адресов
+          type: string
+          readOnly: true
+          nullable: true
+          example: г
+        region_with_type:
+          description: Регион с типом. Для нероссийских адресов может совпадать с `region`
+          type: string
+          readOnly: true
+          example: г Санкт-Петербург
+        region_fias_id:
+          description: ФИАС ID региона. Должен заполняться всегда для российских адресов
+          type: string
+          readOnly: true
+          nullable: true
+          example: c2deb16a-0330-4f05-821f-1d09c93331e6
+        region_kladr_id:
+          description: КЛАДР ID региона
+          type: string
+          readOnly: true
+          nullable: true
+          deprecated: true
+          example: '7800000000000'
+        region_iso_code:
+          description: 'ISO 3166-2:RU код административного образования (в России - регион). Может отсутствовать для нероссийских адресов (пример - Реюньон, Сент-Андре)'
+          type: string
+          readOnly: true
+          nullable: true
+          example: RU-SPE
+
+        area:
+          description: Район в регионе
+          type: string
+          nullable: true
+          readOnly: true
+          example: Краснокамский
+        area_type:
+          description: Тип района в регионе
+          type: string
+          nullable: true
+          readOnly: true
+          example: р-н
+        area_with_type:
+          description: Район в регионе с типом
+          type: string
+          nullable: true
+          readOnly: true
+          example: Краснокамский р-н
+        area_fias_id:
+          description: ФИАС ID района в регионе
+          type: string
+          nullable: true
+          readOnly: true
+          example: c278cbbc-e209-4b0f-b20e-9c19ed6f6802
+        area_kladr_id:
+          description: КЛАДР ID района в регионе
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '0203100000000'
+
+        city:
+          description: Город. Может быть на английском языке для нероссийских адресов
+          type: string
+          nullable: true
+          readOnly: true
+          example: Санкт-Петербург
+        city_type:
+          description: Тип города
+          type: string
+          nullable: true
+          readOnly: true
+          example: г
+        city_with_type:
+          description: Город с типом. Может быть на английском языке для нероссийских адресов
+          type: string
+          nullable: true
+          readOnly: true
+          example: г Санкт-Петербург
+        city_fias_id:
+          description: ФИАС ID города
+          type: string
+          nullable: true
+          readOnly: true
+          example: c2deb16a-0330-4f05-821f-1d09c93331e6
+        city_kladr_id:
+          description: КЛАДР ID города
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '7800000000000'
+
+        settlement:
+          description: Населенный пункт
+          type: string
+          nullable: true
+          readOnly: true
+          example: Жилгородок
+        settlement_type:
+          description: Тип населенного пункта
+          type: string
+          nullable: true
+          readOnly: true
+          example: п
+        settlement_with_type:
+          description: Населённый пункт с типом
+          type: string
+          nullable: true
+          readOnly: true
+          example: п Жилгородок
+        settlement_fias_id:
+          description: ФИАС ID населённого пункта
+          type: string
+          nullable: true
+          readOnly: true
+          example: 8eab754d-38df-4fac-bebd-b27a46f45ea2
+        settlement_kladr_id:
+          description: КЛАДР ID населенного пункта
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '4701200005100'
+
+        street:
+          description: Улица
+          type: string
+          nullable: true
+          readOnly: true
+          example: Московский
+        street_type:
+          description: Тип улицы
+          type: string
+          nullable: true
+          readOnly: true
+          example: пр-кт
+        street_with_type:
+          description: Улица с типом
+          type: string
+          nullable: true
+          readOnly: true
+          example: Московский пр-кт
+        street_fias_id:
+          description: ФИАС ID улицы
+          type: string
+          nullable: true
+          readOnly: true
+          example: 01b3acfc-5a4d-4d0f-a2de-67aef6effe31
+        street_kladr_id:
+          description: КЛАДР ID улицы
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '78000000000085200'
+
+        house:
+          description: Дом/дробь/строение/корпус/литера без сокращений
+          type: string
+          nullable: true
+          example: 'дом 1А/2 строение 3 корпус 4 литера Б'
+        house_fias_id:
+          description: ФИАС ID дома
+          type: string
+          nullable: true
+          readOnly: true
+          example: 315a5cc2-7676-460f-ab44-a85c38eea89a
+        house_kladr_id:
+          description: КЛАДР ID дома
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '7800000000013430010'
+        office:
+          description: Офис/квартира/комната/помещение без сокращений
+          type: string
+          nullable: true
+          example: 'офис 1 помещение 2'
+
+        fias_id:
+          description: >-
+            ФИАС ID самого нижнего адресного объекта с точностью до дома.
+            Должен заполняться всегда для российских адресов.
+            Если необходимо создать заказ с нероссийским адресом, надо указать координаты
+          type: string
+          nullable: true
+          example: 315a5cc2-7676-460f-ab44-a85c38eea89a
+        kladr_id:
+          description: >-
+            КЛАДР ID самого нижнего адресного объекта с точностью до дома. Состоит из следующих элементов:
+              * `СС РРР ГГГ ППП УУУУ АА`
+              * `78 000 000 000 0852 00`
+
+              * `СС РРР ГГГ ППП УУУУ ДДДД`
+              * `78 000 000 000 1343 0010`
+
+              * `СС` – код субъекта Российской Федерации (региона)
+              * `РРР` – код района
+              * `ГГГ` – код города
+              * `ППП` – код населенного пункта
+              * `УУУУ` – код улицы (может отсутствовать)
+              * `ДДДД` - код дома (может отсутствовать)
+              * `АА` – код актуальности
+
+            ФНС больше не поддерживает КЛАДР ID, поэтому он оставлен для совместимости и миграции на ФИАС ID.
+            Для идентификации объектов следует использовать ФИАС ID, не КЛАДР ID
+          type: string
+          nullable: true
+          readOnly: true
+          deprecated: true
+          example: '7800000000013430010'
+
+        lat:
+          description: Широта. Заполняется не всегда даже для российских адресов
+          type: number
+          format: double
+          example: 59.9017959
+        lng:
+          description: Долгота. Заполняется не всегда даже для российских адресов
+          type: number
+          format: double
+          example: 30.3194694
+
+        zip_code:
+          description: Почтовый индекс. Заполняется не всегда даже для российских адресов
+          type: string
+          nullable: true
+          readOnly: true
+          example: '196084'
+        timezone_name:
+          description: Название часового пояса. При наличии координат (`lat`/`lng`) будет заполнено
+          type: string
+          readOnly: true
+          example: 'Europe/Moscow'
+        level:
+          description: >-
+            Уровень точности адреса - до X включительно:
+              * Для российских адресов зависит от наличия `X_fias_id`
+              * Для нероссийских адресов не может быть ниже `region`, так как может быть только `region_iso_code` или `country_iso_code`
+          type: string
+          enum: [ country, region, area, city, settlement, street, house ]
+          readOnly: true
+
+
+        timezone:
+          description: Часовой пояс в часах смещением относительно UTC. Должно быть удалено в пользу `timezone_name`
+          type: integer
+          readOnly: true
+          deprecated: true
 
   responses:
     BadRequest:
