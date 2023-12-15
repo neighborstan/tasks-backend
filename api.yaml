@@ -386,6 +386,8 @@ components:
           type: string
         cargo_description:
           type: string
+        need_document_work:
+          type: boolean
         operations:
           description: Виды работ в точке маршрута
           type: array
