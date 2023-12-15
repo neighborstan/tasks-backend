@@ -80,13 +80,14 @@ components:
           type: string
           format: date-time
         entity:
-          type: object
-          properties: {}
+          oneOf:
+            - $ref: '#/components/schemas/Shipping'
         comment:
           type: string
         payload:
-          type: object
-          properties:  {}
+          oneOf:
+            - $ref: '#/components/schemas/Shipping'
+            - $ref: '#/components/schemas/RoutePoint'
 
     TaskType:
       type: string
@@ -209,8 +210,133 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RoutePoint'
+        resource_requirements:
+          $ref: "#/components/schemas/ResourceRequirements"
         comment:
           type: string
+
+    TransportType:
+      description: >-
+        Тип транспорта:
+          * `lorry` - автомобиль с кузовом
+          * `truck` - седельный тягач (автомобиль без кузова)
+          * `trailer` - прицеп
+      type: string
+      enum: [ lorry, truck, trailer ]
+
+    TransportBodyType:
+      description: >-
+        Тип кузова транспорта:
+          * `awning` - тентованный
+          * `full_metal` - цельнометаллический
+          * `isothermal` - изотермический
+          * `refrigerator` - рефрижератор
+          * `dropside` - бортовой
+          * `tanker` - цистерна
+          * `container` - контейнеровоз
+      type: string
+      enum: [ awning, full_metal, isothermal, refrigerator, dropside, tanker, container ]
+
+
+    ResourceRequirements:
+      title: ResourceRequirements
+      type: object
+      properties:
+        transport_body_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransportBodyType'
+        transport_type:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TransportType'
+        lifting_capacity:
+          type: array
+          items:
+            type: string
+            format: UUID
+            description: uuid Значения типов из справочника CatalogLiftingCapacity
+        lifting_capacities:
+          readOnly: true
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              kind:
+                type: string
+              tonnage:
+                type: number
+                format: double
+              volume:
+                type: number
+                format: double
+              transport_body_type:
+                $ref: '#/components/schemas/TransportBodyType'
+              transport_type:
+                $ref: '#/components/schemas/TransportType'
+        has_russian_citizen:
+          type: boolean
+          description: Гражданство РФ
+        has_driver_coveralls:
+          type: boolean
+          description: Спецодежда для водителя
+        has_no_criminal_records:
+          type: boolean
+          description: Отсутствие судимости у водителя
+        has_rigid_board:
+          type: boolean
+          description: Наличие жесткого борта
+        has_medical_book:
+          type: boolean
+          description: Наличие медицинской
+        has_removable_upper_beam:
+          type: boolean
+          description: Наличие съемной балки
+        has_removable_side_racks:
+          type: boolean
+          description: Наличие съемной стойки
+        is_express:
+          type: boolean
+          description: Требовение ускоренной доставки груза
+        number_of_belts:
+          type: integer
+          description: Количество ремней
+          nullable: true
+        has_shipping_power_of_attorney_original:
+          type: boolean
+          description: Наличие оригинала доверенности
+        is_disinfected:
+          type: boolean
+          description: Требование санитарной обработки
+        has_temperature_check:
+          type: boolean
+          description: Наличие температурного чека
+        temperature_condition:
+          description: Температурный режим
+          type: object
+          nullable: true
+          properties:
+            min:
+              type: number
+              format: double
+            max:
+              type: number
+              format: double
+        own_transport_only:
+          description: Только транспорт в собственности
+          type: boolean
+        timber_bunks:
+          description: Коники
+          type: boolean
+        tir_document:
+          description: Докумен TIR
+          type: boolean
+        cmr_document:
+          description: Документ CMR
+          type: boolean
 
     RoutePoint:
       description: Точка маршрута

@@ -20,10 +20,10 @@ import java.util.UUID;
 public class TasksService {
 
     private final NamedParameterJdbcTemplate jdbc;
-    private final RowMapper<TaskDto> taskRowMapper;
+    private final RowMapper<TaskDto<?,?>> taskRowMapper;
     private final ObjectMapper mapper;
 
-    public List<TaskDto> actor(String actor) {
+    public List<TaskDto<?,?>> actor(String actor) {
         return jdbc.query(
                 """
                         select * from tasks join assignment on tasks.id = assignment.task
@@ -34,7 +34,7 @@ public class TasksService {
         );
     }
 
-    public List<TaskDto> pipeline(String pipeline) {
+    public List<TaskDto<?,?>> pipeline(String pipeline) {
         return jdbc.query(
                 """
                         select * from tasks
@@ -45,11 +45,9 @@ public class TasksService {
         );
     }
 
-    public Optional<TaskDto> get(UUID id) {
+    public Optional<TaskDto<?,?>> get(UUID id) {
         return jdbc.query(
-                        """
-                                select * from tasks where id = :id
-                                """,
+                        "select * from tasks where id = :id",
                         Map.ofEntries(Map.entry("id", id)),
                         taskRowMapper
                 )
@@ -57,7 +55,14 @@ public class TasksService {
                 .findFirst();
     }
 
-    public TaskDto persist(TaskDto task) {
+    public void delete(TaskDto<?,?> task) {
+        jdbc.update(
+                "delete from tasks where id = :id",
+                Map.ofEntries(Map.entry("id", task.getId()))
+        );
+    }
+
+    public TaskDto<?,?> persist(TaskDto<?,?> task) {
         try {
             var map = new MapSqlParameterSource();
             map.addValue("id", task.getId());

@@ -1,6 +1,5 @@
 package tech.saas.tasks.core.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -15,13 +14,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AssignmentRowMapper implements RowMapper<TaskAssignmentDto> {
 
-    private final ObjectMapper mapper;
-
     @Override
     public TaskAssignmentDto mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new TaskAssignmentDto(
                 rs.getObject("task", UUID.class),
                 rs.getString("actor"),
+                rs.getString("pipeline"),
                 rs.getTimestamp("instant").toInstant().atOffset(ZoneOffset.UTC)
         );
     }

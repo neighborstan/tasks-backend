@@ -19,7 +19,7 @@ public class CancelTasksUC {
     private final AssignmentService assignmentService;
     private final Clock clock;
 
-    public List<TaskDto> apply(Shipping shipping) {
+    public List<TaskDto<?,?>> apply(Shipping shipping) {
 
         var tasks = tasksService.pipeline(String.valueOf(shipping.getId()));
         for (var task : tasks) {

@@ -1,6 +1,5 @@
 package tech.saas.tasks.core.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -19,9 +18,28 @@ public class AssignmentService {
 
     private final NamedParameterJdbcTemplate jdbc;
     private final RowMapper<TaskAssignmentDto> rowMapper;
-    private final ObjectMapper mapper;
+
+    public List<TaskAssignmentDto> pipeline(String pipeline) {
+        return jdbc.query("select distinct assignment.* from assignment where pipeline = :pipeline",
+                Map.ofEntries(Map.entry("pipeline", pipeline)),
+                rowMapper
+        );
+    }
 
     public Optional<TaskAssignmentDto> assignment(UUID task, String actor) {
+        return jdbc.query(
+                        "select * from assignment where task = :task and actor = :actor",
+                        Map.ofEntries(
+                                Map.entry("task", task),
+                                Map.entry("actor", actor)
+                        ),
+                        rowMapper
+                )
+                .stream()
+                .findFirst();
+    }
+
+    public Optional<TaskAssignmentDto> assignment(UUID task, String pipeline, String actor) {
         return jdbc.query(
                         "select * from assignment where task = :task and actor = :actor",
                         Map.ofEntries(
@@ -46,12 +64,13 @@ public class AssignmentService {
 
         jdbc.update(
                 """
-                        insert into assignment(task, actor, instant)
-                        values (:task, :actor, :instant)
+                        insert into assignment(task, pipeline, actor, instant)
+                        values (:task, :pipeline, :actor, :instant)
                         on conflict (task, actor) do nothing
                         """,
                 Map.ofEntries(
                         Map.entry("task", assignment.getTask()),
+                        Map.entry("pipeline", assignment.getPipeline()),
                         Map.entry("actor", assignment.getActor()),
                         Map.entry("instant", Timestamp.from(assignment.getInstant().toInstant()))
                 )
@@ -68,6 +87,19 @@ public class AssignmentService {
                 Map.ofEntries(
                         Map.entry("task", assignment.getTask()),
                         Map.entry("actor", assignment.getActor())
+                )
+        );
+    }
+
+    public void delete(UUID task, String pipeline) {
+        jdbc.update(
+                """
+                        delete from assignment
+                        where task = :task and pipeline = :pipeline
+                        """,
+                Map.ofEntries(
+                        Map.entry("task", task),
+                        Map.entry("pipeline", pipeline)
                 )
         );
     }

@@ -8,11 +8,10 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
-public class RoutePointDto {
+public class RoutePointDto implements TaskPayload {
 
     @JsonProperty("id")
     private Integer id;

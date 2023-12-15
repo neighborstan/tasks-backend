@@ -12,7 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TaskAssignmentDto {
 
-    private UUID task;
-    private String actor;
-    private OffsetDateTime instant;
+    private final UUID task;
+    private final String actor;
+    private final String pipeline;
+    private final OffsetDateTime instant;
 }

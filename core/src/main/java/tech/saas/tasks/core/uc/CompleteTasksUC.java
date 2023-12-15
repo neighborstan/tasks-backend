@@ -7,6 +7,8 @@ import tech.saas.tasks.core.exceptions.ForbiddenException;
 import tech.saas.tasks.core.exceptions.NotFoundException;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
 import tech.saas.tasks.core.models.TaskDto;
+import tech.saas.tasks.core.models.TaskEntity;
+import tech.saas.tasks.core.models.TaskPayload;
 import tech.saas.tasks.core.services.AssignmentService;
 import tech.saas.tasks.core.services.TasksService;
 
@@ -23,7 +25,7 @@ public class CompleteTasksUC {
     private final TasksService tasksService;
     private final AssignmentService assignmentService;
 
-    public TaskDto apply(String actor, UUID id, OffsetDateTime instant) {
+    public TaskDto<? extends TaskEntity, ? extends TaskPayload> apply(String actor, UUID id, OffsetDateTime instant) {
         var exists = tasksService.get(id);
         if (exists.isEmpty())
             throw new NotFoundException("задача не найдена");
@@ -61,6 +63,7 @@ public class CompleteTasksUC {
                     new TaskAssignmentDto(
                             o.getId(),
                             actor,
+                            o.getPipeline(),
                             OffsetDateTime.now(clock)
                     )
             );

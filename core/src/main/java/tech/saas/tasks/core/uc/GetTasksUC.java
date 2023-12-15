@@ -13,7 +13,7 @@ public class GetTasksUC {
 
     private final TasksService tasksService;
 
-    public List<TaskDto> tasks(String phone) {
+    public List<TaskDto<?,?>> tasks(String phone) {
         return tasksService.actor(phone);
     }
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskDto {
+public class TaskDto<E extends TaskEntity, P extends TaskPayload> {
 
     private UUID id;
     private Type type;
@@ -24,8 +24,8 @@ public class TaskDto {
     private List<Story> story;
     private OffsetDateTime transition;
 
-    private Object entity;
-    private Object payload;
+    private E entity;
+    private P payload;
 
     private String comment;
 
@@ -34,7 +34,7 @@ public class TaskDto {
         MOVEMENT_START,
         WAYPOINT_REACH,
         DOCKING_START,
-        DOCKING_END;
+        DOCKING_END
     }
 
 
@@ -42,7 +42,7 @@ public class TaskDto {
         PENDING,
         ACTIVE,
         DONE,
-        CANCELED;
+        CANCELED
     }
 
     @Getter

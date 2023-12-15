@@ -1,12 +1,16 @@
 package tech.saas.tasks.core.uc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.converters.PointConverter;
+import tech.saas.tasks.core.models.PolymorphMap;
 import tech.saas.tasks.core.models.Shipping;
 import tech.saas.tasks.core.models.ShippingAssignedResourcesInner;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
 import tech.saas.tasks.core.models.TaskDto;
+import tech.saas.tasks.core.models.TaskEntity;
+import tech.saas.tasks.core.models.TaskPayload;
 import tech.saas.tasks.core.services.AssignmentService;
 import tech.saas.tasks.core.services.CoreService;
 import tech.saas.tasks.core.services.TasksService;
@@ -14,7 +18,6 @@ import tech.saas.tasks.core.services.UUIDGen;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,8 +33,10 @@ public class GenerateTasksUC {
     private final CoreService coreService;
     private final UUIDGen uuidGen;
     private final Clock clock;
+    private final ObjectMapper mapper;
 
-    public List<TaskDto> apply(Shipping shipping, Map<String,?> raw) {
+    public List<TaskDto<?, ?>> apply(Shipping shipping, Map<String, ?> raw) {
+
         var request =
                 shipping.getShippingRequestInfo();
 
@@ -69,90 +74,150 @@ public class GenerateTasksUC {
 
         var assignments =
                 actors.stream()
-                        .map(p ->
+                        .map(actor ->
                                 Map.entry(
                                         new TaskAssignmentDto(
-                                                uuidGen.gen(p, shipping.getId()),
-                                                p,
+                                                uuidGen.gen(actor, shipping.getId()),
+                                                actor,
+                                                String.valueOf(shipping.getId()),
                                                 OffsetDateTime.now(clock)
                                         ),
-                                        new TaskDto(
-                                                uuidGen.gen(p, shipping.getId()),
+                                        new TaskDto<TaskEntity, TaskPayload>(
+                                                uuidGen.gen(actor, shipping.getId()),
                                                 TaskDto.Type.READINESS_CHECK,
                                                 TaskDto.Status.ACTIVE,
                                                 String.valueOf(shipping.getId()),
                                                 "tasks-service",
                                                 story,
                                                 OffsetDateTime.now(clock),
-                                                raw,
-                                                raw,
+                                                new PolymorphMap<>(raw),
+                                                new PolymorphMap<>(raw),
                                                 Objects.requireNonNullElse(info.getComment(), "")
                                         )
                                 )
                         )
                         .toList();
 
+        var agreements =
+                tasksService.pipeline(String.valueOf(shipping.getId())).stream()
+                        .filter(t -> Objects.equals(t.getType(), TaskDto.Type.READINESS_CHECK))
+                        .filter(t -> Objects.equals(t.getStatus(), TaskDto.Status.DONE))
+                        .map(t -> assignmentService.assignment(t.getId()))
+                        .flatMap(List::stream)
+                        .map(TaskAssignmentDto::getActor)
+                        .toList();
+
         for (var a : assignments) {
             var task = a.getValue();
             var assignment = a.getKey();
+            if (agreements.contains(assignment.getActor()))
+                continue;
+
             tasksService.persist(task);
             assignmentService.persist(assignment);
         }
 
-        return route.stream()
-                .flatMap(p ->
-                        Stream.of(
-                                new TaskDto(
-                                        uuidGen.gen(p.getId(), shipping.getId(), TaskDto.Type.MOVEMENT_START),
-                                        TaskDto.Type.MOVEMENT_START,
-                                        TaskDto.Status.ACTIVE,
-                                        String.valueOf(shipping.getId()),
-                                        "tasks-service",
-                                        story,
-                                        OffsetDateTime.now(clock).plusMinutes(5),
-                                        raw,
-                                        pointConverter.apiToCore(p),
-                                        ""
-                                ),
-                                new TaskDto(
-                                        uuidGen.gen(p.getId(), shipping.getId(), TaskDto.Type.WAYPOINT_REACH),
-                                        TaskDto.Type.WAYPOINT_REACH,
-                                        TaskDto.Status.ACTIVE,
-                                        String.valueOf(shipping.getId()),
-                                        "tasks-service",
-                                        story,
-                                        OffsetDateTime.now(clock).plusMinutes(10),
-                                        raw,
-                                        pointConverter.apiToCore(p),
-                                        ""
-                                ),
-                                new TaskDto(
-                                        uuidGen.gen(p.getId(), shipping.getId(), TaskDto.Type.DOCKING_START),
-                                        TaskDto.Type.DOCKING_START,
-                                        TaskDto.Status.ACTIVE,
-                                        String.valueOf(shipping.getId()),
-                                        "tasks-service",
-                                        story,
-                                        OffsetDateTime.now(clock).plusMinutes(15),
-                                        raw,
-                                        pointConverter.apiToCore(p),
-                                        ""
-                                ),
-                                new TaskDto(
-                                        uuidGen.gen(p.getId(), shipping.getId(), TaskDto.Type.DOCKING_END),
-                                        TaskDto.Type.DOCKING_END,
-                                        TaskDto.Status.ACTIVE,
-                                        String.valueOf(shipping.getId()),
-                                        "tasks-service",
-                                        story,
-                                        OffsetDateTime.now(clock).plusMinutes(20),
-                                        raw,
-                                        pointConverter.apiToCore(p),
-                                        ""
+        var delete =
+                assignmentService.pipeline(String.valueOf(shipping.getId())).stream()
+                        .filter(a -> !actors.contains(a.getActor()))
+                        .toList();
+        for (var can : delete)
+            assignmentService.delete(can);
+
+        var plan =
+                route.stream()
+                        .flatMap(p -> {
+                                    var location = p.getLocation();
+                                    var fias = location.getFiasId();
+                                    return Stream.of(
+                                            new TaskDto<TaskEntity, TaskPayload>(
+                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.MOVEMENT_START),
+                                                    TaskDto.Type.MOVEMENT_START,
+                                                    TaskDto.Status.ACTIVE,
+                                                    String.valueOf(shipping.getId()),
+                                                    "tasks-service",
+                                                    story,
+                                                    OffsetDateTime.now(clock).plusMinutes(5),
+                                                    new PolymorphMap<>(raw),
+                                                    pointConverter.apiToCore(p),
+                                                    ""
+                                            ),
+                                            new TaskDto<TaskEntity, TaskPayload>(
+                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.WAYPOINT_REACH),
+                                                    TaskDto.Type.WAYPOINT_REACH,
+                                                    TaskDto.Status.ACTIVE,
+                                                    String.valueOf(shipping.getId()),
+                                                    "tasks-service",
+                                                    story,
+                                                    OffsetDateTime.now(clock).plusMinutes(10),
+                                                    new PolymorphMap<>(raw),
+                                                    pointConverter.apiToCore(p),
+                                                    ""
+                                            ),
+                                            new TaskDto<TaskEntity, TaskPayload>(
+                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.DOCKING_START),
+                                                    TaskDto.Type.DOCKING_START,
+                                                    TaskDto.Status.ACTIVE,
+                                                    String.valueOf(shipping.getId()),
+                                                    "tasks-service",
+                                                    story,
+                                                    OffsetDateTime.now(clock).plusMinutes(15),
+                                                    new PolymorphMap<>(raw),
+                                                    pointConverter.apiToCore(p),
+                                                    ""
+                                            ),
+                                            new TaskDto<TaskEntity, TaskPayload>(
+                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.DOCKING_END),
+                                                    TaskDto.Type.DOCKING_END,
+                                                    TaskDto.Status.ACTIVE,
+                                                    String.valueOf(shipping.getId()),
+                                                    "tasks-service",
+                                                    story,
+                                                    OffsetDateTime.now(clock).plusMinutes(20),
+                                                    new PolymorphMap<>(raw),
+                                                    pointConverter.apiToCore(p),
+                                                    ""
+                                            )
+                                    );
+                                }
+                        )
+                        .toList();
+
+
+        var current =
+                tasksService.pipeline(String.valueOf(shipping.getId()))
+                        .stream()
+                        .filter(t -> !Objects.equals(t.getType(), TaskDto.Type.READINESS_CHECK))
+                        .toList();
+
+        // удаляем ненужные
+        for (var can : current) {
+            if (plan.stream().noneMatch(p -> Objects.equals(p.getId(), can.getId()))) {
+                assignmentService.delete(can.getId(), can.getPipeline());
+                tasksService.delete(can);
+            }
+        }
+
+        // добавляем новые
+
+
+        for (var can : plan) {
+            if (current.stream().noneMatch(p -> Objects.equals(p.getId(), can.getId()))) {
+                tasksService.persist(can);
+                actors.stream()
+                        .filter(agreements::contains)
+                        .map(actor -> new TaskAssignmentDto(
+                                        can.getId(),
+                                        actor,
+                                        can.getPipeline(),
+                                        OffsetDateTime.now(clock)
                                 )
                         )
-                )
-                .map(tasksService::persist)
-                .toList();
+                        .forEach(assignmentService::persist);
+            }
+        }
+
+        return tasksService.pipeline(String.valueOf(shipping.getId()));
     }
+
 }
