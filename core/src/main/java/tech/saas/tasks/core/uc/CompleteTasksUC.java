@@ -53,7 +53,8 @@ public class CompleteTasksUC {
                         .filter(v ->
                                 switch (v.getType()) {
                                     case READINESS_CHECK -> false;
-                                    case DOCKING_END, DOCKING_START, MOVEMENT_START, WAYPOINT_REACH -> true;
+                                    case DOCKING_END, DOCKING_START, MOVEMENT_START, WAYPOINT_REACH, SHIPPING_COMPLETE ->
+                                            true;
                                 }
                         )
                         .toList();

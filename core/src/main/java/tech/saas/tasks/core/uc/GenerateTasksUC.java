@@ -183,6 +183,25 @@ public class GenerateTasksUC {
                         )
                         .toList();
 
+        plan = Stream.concat(
+                        plan.stream(),
+                        Stream.of(
+                                new TaskDto<TaskEntity, TaskPayload>(
+                                        uuidGen.gen(shipping.getId()),
+                                        TaskDto.Type.SHIPPING_COMPLETE,
+                                        TaskDto.Status.ACTIVE,
+                                        String.valueOf(shipping.getId()),
+                                        "tasks-service",
+                                        story,
+                                        OffsetDateTime.now(clock).plusMinutes(20),
+                                        new PolymorphMap<>(raw),
+                                        new PolymorphMap<>(raw),
+                                        ""
+                                )
+                        )
+                )
+                .toList();
+
 
         var current =
                 tasksService.pipeline(String.valueOf(shipping.getId()))

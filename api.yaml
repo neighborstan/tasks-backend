@@ -97,6 +97,7 @@ components:
         - WAYPOINT_REACH
         - DOCKING_START
         - DOCKING_END
+        - SHIPPING_COMPLETE
 
     TaskStatus:
       type: string
@@ -214,29 +215,6 @@ components:
           $ref: "#/components/schemas/ResourceRequirements"
         comment:
           type: string
-
-    TransportType:
-      description: >-
-        Тип транспорта:
-          * `lorry` - автомобиль с кузовом
-          * `truck` - седельный тягач (автомобиль без кузова)
-          * `trailer` - прицеп
-      type: string
-      enum: [ lorry, truck, trailer ]
-
-    TransportBodyType:
-      description: >-
-        Тип кузова транспорта:
-          * `awning` - тентованный
-          * `full_metal` - цельнометаллический
-          * `isothermal` - изотермический
-          * `refrigerator` - рефрижератор
-          * `dropside` - бортовой
-          * `tanker` - цистерна
-          * `container` - контейнеровоз
-      type: string
-      enum: [ awning, full_metal, isothermal, refrigerator, dropside, tanker, container ]
-
 
     ResourceRequirements:
       title: ResourceRequirements
@@ -389,19 +367,9 @@ components:
         need_document_work:
           type: boolean
         operations:
-          description: Виды работ в точке маршрута
-          type: array
-          minItems: 1
-          items:
-            type: string
-            enum: [ loading, unloading, paperwork ]
+          $ref: '#/components/schemas/RoutePointOperations'
         operations_loadings:
-          description: Типы загрузок для работ в точке маршрута
-          type: array
-          items:
-            description: Тип растентовки
-            type: string
-            enum: [ full, rear, lateral, upper ]
+          $ref: '#/components/schemas/RoutePointOperationsLoadings'
         operations_duration:
           description: Длительность работ в точке маршрута в минутах
           type: integer
@@ -477,25 +445,7 @@ components:
           type: string
           nullable: true
         private_person_passport_type:
-          description: >-
-            Тип документа:
-              * passport - Пасспорт РФ
-              * driver_license - водительское удостоверение РФ
-              * international_passport - Загранпаспорт РФ
-              * military_identity - Военный билет РФ
-              * ussr_passport - Пасспорт СССР
-              * identity_kazakhstan - уд. личности РК
-              * foreign_citizen_passport - паспорт иностранного гражданина
-              * sailor_passport - паспорт моряка
-              * refuge_request_certificate - свидетельство о рассмотрении ходатайства о признании беженцем на территории РФ
-              * service_passport - служебный паспорт
-              * diplomatic_passport - дипломатический паспорт
-              * residence_request - вид на жительство лица без гражданства
-              * temporary_refuge_certificate - свидетельство о предоставлении временного убежища
-              * foreign_driver_license - водительское удостоверение иностранного гражданина
-          type: string
-          enum: [ passport, driver_license international_passport military_identity ussr_passport identity_kazakhstan foreign_citizen_passport sailor_passport refuge_request_certificate service_passport diplomatic_passport residence_request temporary_refuge_certificate foreign_driver_license ]
-          nullable: true
+          $ref: '#/components/schemas/PrivatePersonPassportType'
         private_person_passport_number:
           description: Серия и номер паспорта физического лица
           type: string
@@ -863,6 +813,190 @@ components:
           readOnly: true
           deprecated: true
 
+    TransportType:
+      description: >-
+        Тип транспорта:
+          * `lorry` - автомобиль с кузовом
+          * `truck` - седельный тягач (автомобиль без кузова)
+          * `trailer` - прицеп
+      type: string
+      enum: [ lorry, truck, trailer ]
+
+    CargoPacking:
+      description: >-
+        Упаковка груза:
+          * `reels` - Барабаны
+          * `big_bags` - Биг-бэги
+          * `barrels` - Бочки
+          * `eurocubes` - Еврокубы
+          * `cans` - Канистры
+          * `coils` - Катушки
+          * `boxes` - Коробки
+          * `sheets` - Листы
+          * `bags` - Мешки
+          * `in_bulk` - Навалом
+          * `not_specified` - Нет упаковки
+          * `pallets` - Паллеты EUR
+          * `fin_pallets` - Паллеты FIN
+          * `packs` - Пачки
+          * `pyramid` - Пирамида
+          * `loose` - Россыпью
+          * `rolls` - Рулоны
+          * `cases` - Ящики
+      type: string
+      enum: [ reels, big_bags, barrels, eurocubes, cans, coils, boxes, sheets, bags, in_bulk, not_specified, pallets, fin_pallets, packs, pyramid, loose, rolls, cases ]
+
+    CargoDescription:
+      type: object
+      enum:
+        - "Аварийно-спасательные средства"
+        - "Автозапчасти"
+        - "Автотовары"
+        - "Автошины"
+        - "Алкоголь"
+        - "Алюминий (порошок)"
+        - "Алюминий (чушки)"
+        - "Арматура"
+        - "Арматура трубопроводная"
+        - "Бумага"
+        - "Бытовая техника"
+        - "Бытовая химия"
+        - "Бытовые товары"
+        - "ДВП. Древесные материалы"
+        - "Двери"
+        - "Детские товары"
+        - "Древесная щепа"
+        - "Древесные плиты"
+        - "Другое"
+        - "Запчасти/Комплектующие"
+        - "Зоотовары"
+        - "Инструмент"
+        - "Кабель"
+        - "Канцелярские товары"
+        - "Каучук"
+        - "Керамическая плитка"
+        - "Комбикорм/Корм для животных и рыб"
+        - "Комплектующие"
+        - "Консервы"
+        - "Косметика"
+        - "Крупы"
+        - "Линолеум"
+        - "МДФ. Древесные материалы"
+        - "Масла автомобильные"
+        - "Мебель"
+        - "Медикаменты"
+        - "Медицинское оборудование"
+        - "Медтовары"
+        - "Металл"
+        - "Металлолом"
+        - "Металлопродукция"
+        - "Металлопрокат"
+        - "Метизы/Крепежи"
+        - "Музыкальное оборудование"
+        - "Мука"
+        - "Напитки (безалкогольные)"
+        - "Обои"
+        - "Оборудование"
+        - "Обувь"
+        - "Овощи/Фрукты"
+        - "Одежда"
+        - "Оргстекло"
+        - "Оргтехника"
+        - "Пеноблоки"
+        - "Пенопласт"
+        - "Пиломатериалы"
+        - "Пищевые добавки"
+        - "Пластмассы/Пластмассовые изделия"
+        - "Поддоны"
+        - "Посуда"
+        - "Предметы искусства"
+        - "Продукты глубокой заморозки"
+        - "Продукты питания"
+        - "Резиновые изделия/Резина"
+        - "Сантехника"
+        - "Сахар"
+        - "Сборный груз"
+        - "Семена"
+        - "Соль"
+        - "Спецтехника"
+        - "Спорттовары"
+        - "Стекло"
+        - "Стеклотара"
+        - "Строительные древескстиль"
+        - "Строительные древесные плиты"
+        - "Строительные товары"
+        - "Сухие строительные смеси"
+        - "Сырье"
+        - "ТНП/FMCG"
+        - "Табачная продукция"
+        - "Тара/Упаковка"
+        - "Текстиль"
+        - "Типография/Полиграфия"
+        - "Товары для дома"
+        - "Топливо (бензин)"
+        - "Транспортное средство"
+        - "Трубы"
+        - "Углеграфитовые блоки"
+        - "Удобрения"
+        - "Уплотнитель"
+        - "Фанера"
+        - "Химпродукты"
+        - "Химсырье"
+        - "Хозтовары"
+        - "Цветы/Растения"
+        - "Электроника"
+        - "Электрооборудование"
+        - "Ювелирные изделия"
+
+    TransportBodyType:
+      description: >-
+        Тип кузова транспорта:
+          * `awning` - тентованный
+          * `full_metal` - цельнометаллический
+          * `isothermal` - изотермический
+          * `refrigerator` - рефрижератор
+          * `dropside` - бортовой
+          * `tanker` - цистерна
+          * `container` - контейнеровоз
+      type: string
+      enum: [ awning, full_metal, isothermal, refrigerator, dropside, tanker, container ]
+
+    RoutePointOperations:
+      description: Виды работ в точке маршрута
+      type: array
+      minItems: 1
+      items:
+        type: string
+        enum: [ loading, unloading, paperwork ]
+
+    RoutePointOperationsLoadings:
+      description: Типы загрузок для работ в точке маршрута
+      type: array
+      items:
+        description: Тип растентовки
+        type: string
+        enum: [ full, rear, lateral, upper ]
+
+    PrivatePersonPassportType:
+      description: >-
+        Тип документа:
+          * passport - Пасспорт РФ
+          * driver_license - водительское удостоверение РФ
+          * international_passport - Загранпаспорт РФ
+          * military_identity - Военный билет РФ
+          * ussr_passport - Пасспорт СССР
+          * identity_kazakhstan - уд. личности РК
+          * foreign_citizen_passport - паспорт иностранного гражданина
+          * sailor_passport - паспорт моряка
+          * refuge_request_certificate - свидетельство о рассмотрении ходатайства о признании беженцем на территории РФ
+          * service_passport - служебный паспорт
+          * diplomatic_passport - дипломатический паспорт
+          * residence_request - вид на жительство лица без гражданства
+          * temporary_refuge_certificate - свидетельство о предоставлении временного убежища
+          * foreign_driver_license - водительское удостоверение иностранного гражданина
+      type: string
+      enum: [ passport, driver_license international_passport military_identity ussr_passport identity_kazakhstan foreign_citizen_passport sailor_passport refuge_request_certificate service_passport diplomatic_passport residence_request temporary_refuge_certificate foreign_driver_license ]
+      nullable: true
   responses:
     BadRequest:
       description: Неверные параметры запроса

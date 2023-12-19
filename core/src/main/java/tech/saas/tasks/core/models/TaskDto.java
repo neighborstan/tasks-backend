@@ -34,7 +34,8 @@ public class TaskDto<E extends TaskEntity, P extends TaskPayload> {
         MOVEMENT_START,
         WAYPOINT_REACH,
         DOCKING_START,
-        DOCKING_END
+        DOCKING_END,
+        SHIPPING_COMPLETE
     }
 
 
