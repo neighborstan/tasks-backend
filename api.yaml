@@ -180,6 +180,24 @@ components:
               driver_contact_info:
                 type: string
 
+        selected_car_supply:
+          type: array
+          items:
+            $ref: '#/components/schemas/SelectedCarSupply'
+
+
+    SelectedCarSupply:
+      type: object
+      properties:
+        route_point_id:
+          type: integer
+        car_supply_at:
+          type: string
+          format: date-time
+        car_supply_to:
+          type: string
+          format: date-time
+
     Driver:
       type: object
       properties:

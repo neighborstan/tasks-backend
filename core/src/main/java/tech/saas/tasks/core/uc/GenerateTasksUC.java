@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.converters.PointConverter;
 import tech.saas.tasks.core.models.PolymorphMap;
+import tech.saas.tasks.core.models.SelectedCarSupply;
 import tech.saas.tasks.core.models.Shipping;
 import tech.saas.tasks.core.models.ShippingAssignedResourcesInner;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
@@ -18,9 +19,11 @@ import tech.saas.tasks.core.services.UUIDGen;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -70,7 +73,28 @@ public class GenerateTasksUC {
                         )
                 );
 
+        var now = OffsetDateTime.now(clock);
         var info = shipping.getShippingRequestInfo();
+        var supply = shipping.getSelectedCarSupply();
+        var times =
+                supply.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        SelectedCarSupply::getRoutePointId,
+                                        SelectedCarSupply::getCarSupplyAt
+                                )
+                        );
+        var min =
+                times.values().stream()
+                        .min(Comparator.comparing(x -> x))
+                        .orElse(OffsetDateTime.now(clock));
+
+        var barrier = now.plusDays(7);
+
+        var status =
+                min.isBefore(barrier)
+                        ? TaskDto.Status.ACTIVE
+                        : TaskDto.Status.PENDING;
 
         var assignments =
                 actors.stream()
@@ -85,11 +109,11 @@ public class GenerateTasksUC {
                                         new TaskDto<TaskEntity, TaskPayload>(
                                                 uuidGen.gen(actor, shipping.getId()),
                                                 TaskDto.Type.READINESS_CHECK,
-                                                TaskDto.Status.ACTIVE,
+                                                status,
                                                 String.valueOf(shipping.getId()),
                                                 "tasks-service",
                                                 story,
-                                                OffsetDateTime.now(clock),
+                                                min,
                                                 new PolymorphMap<>(raw),
                                                 new PolymorphMap<>(raw),
                                                 Objects.requireNonNullElse(info.getComment(), "")
@@ -129,6 +153,8 @@ public class GenerateTasksUC {
                         .flatMap(p -> {
                                     var location = p.getLocation();
                                     var fias = location.getFiasId();
+                                    var time = times.getOrDefault(p.getId(), OffsetDateTime.now(clock));
+
                                     return Stream.of(
                                             new TaskDto<TaskEntity, TaskPayload>(
                                                     uuidGen.gen(fias, shipping.getId(), TaskDto.Type.MOVEMENT_START),
@@ -137,7 +163,7 @@ public class GenerateTasksUC {
                                                     String.valueOf(shipping.getId()),
                                                     "tasks-service",
                                                     story,
-                                                    OffsetDateTime.now(clock).plusMinutes(5),
+                                                    time.plusMinutes(5),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -149,7 +175,7 @@ public class GenerateTasksUC {
                                                     String.valueOf(shipping.getId()),
                                                     "tasks-service",
                                                     story,
-                                                    OffsetDateTime.now(clock).plusMinutes(10),
+                                                    time.plusMinutes(10),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -161,7 +187,7 @@ public class GenerateTasksUC {
                                                     String.valueOf(shipping.getId()),
                                                     "tasks-service",
                                                     story,
-                                                    OffsetDateTime.now(clock).plusMinutes(15),
+                                                    time.plusMinutes(15),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -173,7 +199,7 @@ public class GenerateTasksUC {
                                                     String.valueOf(shipping.getId()),
                                                     "tasks-service",
                                                     story,
-                                                    OffsetDateTime.now(clock).plusMinutes(20),
+                                                    time.plusMinutes(20),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -183,6 +209,10 @@ public class GenerateTasksUC {
                         )
                         .toList();
 
+        var max =
+                times.values().stream()
+                        .max(Comparator.comparing(x -> x))
+                        .orElse(OffsetDateTime.now(clock));
         plan = Stream.concat(
                         plan.stream(),
                         Stream.of(
@@ -193,7 +223,7 @@ public class GenerateTasksUC {
                                         String.valueOf(shipping.getId()),
                                         "tasks-service",
                                         story,
-                                        OffsetDateTime.now(clock).plusMinutes(20),
+                                        max.plusMinutes(60),
                                         new PolymorphMap<>(raw),
                                         new PolymorphMap<>(raw),
                                         ""
