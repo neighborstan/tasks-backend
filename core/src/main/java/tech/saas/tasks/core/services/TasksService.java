@@ -72,19 +72,21 @@ public class TasksService {
             map.addValue("author", task.getAuthor());
             map.addValue("story", mapper.writeValueAsString(task.getStory()));
             map.addValue("transition", Timestamp.from(task.getTransition().toInstant()));
+            map.addValue("contacts", mapper.writeValueAsString(task.getContacts()));
             map.addValue("entity", mapper.writeValueAsString(task.getEntity()));
             map.addValue("payload", mapper.writeValueAsString(task.getPayload()));
             map.addValue("comment", task.getComment());
 
             jdbc.update("""
-                            insert into tasks(id, pipeline, type, status, author, story, transition, entity, payload, comment)
-                            values (:id, :pipeline, :type, :status, :author, :story::jsonb, :transition, :entity::jsonb, :payload::jsonb, :comment)
+                            insert into tasks(id, pipeline, type, status, author, story, transition, contacts, entity, payload, comment)
+                            values (:id, :pipeline, :type, :status, :author, :story::jsonb, :transition, :contacts::jsonb, :entity::jsonb, :payload::jsonb, :comment)
                             on conflict (id) do update set
                             pipeline = excluded.pipeline,
                             author = excluded.author,
                             status = excluded.status,
                             story = excluded.story,
                             transition = excluded.transition,
+                            contacts = excluded.contacts,
                             entity = excluded.entity,
                             payload = excluded.payload,
                             comment = excluded.comment
