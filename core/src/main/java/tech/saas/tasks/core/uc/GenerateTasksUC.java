@@ -152,10 +152,10 @@ public class GenerateTasksUC {
 
         var plan =
                 route.stream()
-                        .flatMap(p -> {
-                                    var location = p.getLocation();
+                        .flatMap(point -> {
+                                    var location = point.getLocation();
                                     var fias = location.getFiasId();
-                                    var time = times.getOrDefault(p.getId(), OffsetDateTime.now(clock));
+                                    var time = times.getOrDefault(point.getId(), OffsetDateTime.now(clock));
 
                                     return Stream.of(
                                             new TaskDto<TaskEntity, TaskPayload>(
@@ -168,7 +168,7 @@ public class GenerateTasksUC {
                                                     time.plusMinutes(5),
                                                     Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
-                                                    pointConverter.apiToCore(p),
+                                                    pointConverter.apiToCore(point),
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
@@ -181,7 +181,7 @@ public class GenerateTasksUC {
                                                     time.plusMinutes(10),
                                                     Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
-                                                    pointConverter.apiToCore(p),
+                                                    pointConverter.apiToCore(point),
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
@@ -194,7 +194,7 @@ public class GenerateTasksUC {
                                                     time.plusMinutes(15),
                                                     Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
-                                                    pointConverter.apiToCore(p),
+                                                    pointConverter.apiToCore(point),
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
@@ -207,7 +207,7 @@ public class GenerateTasksUC {
                                                     time.plusMinutes(20),
                                                     Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
-                                                    pointConverter.apiToCore(p),
+                                                    pointConverter.apiToCore(point),
                                                     ""
                                             )
                                     );

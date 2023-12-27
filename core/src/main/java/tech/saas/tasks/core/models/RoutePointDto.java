@@ -43,15 +43,6 @@ public class RoutePointDto implements TaskPayload {
     @JsonProperty("cargo_description")
     private String cargoDescription;
 
-    @JsonProperty("operations")
-    private List<String> operations;
-
-    @JsonProperty("operations_loadings")
-    private List<String> operationsLoadings;
-
-    @JsonProperty("operations_duration")
-    private Integer operationsDuration;
-
     @JsonProperty("additional_services")
     private List<AdditionalService> additionalServices;
 

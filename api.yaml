@@ -437,15 +437,6 @@ components:
           type: string
         need_document_work:
           type: boolean
-        operations:
-          $ref: '#/components/schemas/RoutePointOperations'
-        operations_loadings:
-          $ref: '#/components/schemas/RoutePointOperationsLoadings'
-        operations_duration:
-          description: Длительность работ в точке маршрута в минутах
-          type: integer
-          minimum: 10
-          maximum: 2879
         additional_services:
           description: Дополнительные услуги в точке маршрута
           type: array
