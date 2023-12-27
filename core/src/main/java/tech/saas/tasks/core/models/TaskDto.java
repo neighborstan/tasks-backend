@@ -23,7 +23,7 @@ public class TaskDto<E extends TaskEntity, P extends TaskPayload> {
 
     private List<Story> story;
     private OffsetDateTime transition;
-
+    private List<Contact> contacts;
     private E entity;
     private P payload;
 
@@ -56,6 +56,23 @@ public class TaskDto<E extends TaskEntity, P extends TaskPayload> {
         private Status status;
         private OffsetDateTime instant;
 
+
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Contact {
+
+        private String name;
+        private Role role;
+        private String phone;
+
+        public enum Role {
+            LOGIST,
+            DISPATCHER
+        }
 
     }
 }

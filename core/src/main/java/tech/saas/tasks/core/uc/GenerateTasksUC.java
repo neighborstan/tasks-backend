@@ -19,6 +19,7 @@ import tech.saas.tasks.core.services.UUIDGen;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +115,7 @@ public class GenerateTasksUC {
                                                 "tasks-service",
                                                 story,
                                                 min,
+                                                Collections.emptyList(),
                                                 new PolymorphMap<>(raw),
                                                 new PolymorphMap<>(raw),
                                                 Objects.requireNonNullElse(info.getComment(), "")
@@ -164,6 +166,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(5),
+                                                    Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -176,6 +179,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(10),
+                                                    Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -188,6 +192,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(15),
+                                                    Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -200,6 +205,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(20),
+                                                    Collections.emptyList(),
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(p),
                                                     ""
@@ -224,6 +230,7 @@ public class GenerateTasksUC {
                                         "tasks-service",
                                         story,
                                         max.plusMinutes(60),
+                                        Collections.emptyList(),
                                         new PolymorphMap<>(raw),
                                         new PolymorphMap<>(raw),
                                         ""

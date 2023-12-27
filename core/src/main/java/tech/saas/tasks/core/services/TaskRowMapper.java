@@ -7,9 +7,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.models.PolymorphMap;
 import tech.saas.tasks.core.models.TaskDto;
-import tech.saas.tasks.core.models.TaskEntity;
-import tech.saas.tasks.core.models.TaskPayload;
-import tech.saas.tasks.core.models.TaskStatus;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -21,12 +18,12 @@ import java.util.UUID;
 
 @Component
 @AllArgsConstructor
-public class TaskRowMapper implements RowMapper<TaskDto<?,?>> {
+public class TaskRowMapper implements RowMapper<TaskDto<?, ?>> {
 
     private final ObjectMapper mapper;
 
     @Override
-    public TaskDto<?,?> mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public TaskDto<?, ?> mapRow(ResultSet rs, int rowNum) throws SQLException {
         try {
             return new TaskDto(
                     rs.getObject("id", UUID.class),
@@ -36,8 +33,9 @@ public class TaskRowMapper implements RowMapper<TaskDto<?,?>> {
                     rs.getString("author"),
                     mapper.readValue(rs.getString("story"), new TypeReference<List<TaskDto.Story>>() {}),
                     rs.getTimestamp("transition").toInstant().atOffset(ZoneOffset.UTC),
-                    new PolymorphMap<>(mapper.readValue(rs.getString("entity"), new TypeReference<Map<String,?>>() {})),
-                    new PolymorphMap<>(mapper.readValue(rs.getString("payload"), new TypeReference<Map<String,?>>() {})),
+                    mapper.readValue(rs.getString("contacts"), new TypeReference<List<TaskDto.Contact>>() {}),
+                    new PolymorphMap<>(mapper.readValue(rs.getString("entity"), new TypeReference<Map<String, ?>>() {})),
+                    new PolymorphMap<>(mapper.readValue(rs.getString("payload"), new TypeReference<Map<String, ?>>() {})),
                     rs.getString("comment")
             );
         }

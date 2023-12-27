@@ -84,6 +84,10 @@ components:
             - $ref: '#/components/schemas/Shipping'
         comment:
           type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskContact'
         payload:
           oneOf:
             - $ref: '#/components/schemas/Shipping'
@@ -106,6 +110,18 @@ components:
         - ACTIVE
         - DONE
         - CANCELED
+
+    TaskContact:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          enum:
+            - LOGIST
+            - DISPATCHER
+        phone:
+          type: string
 
     Story:
       type: object
@@ -140,6 +156,8 @@ components:
         id:
           type: string
           format: uuid
+        human_friendly_id:
+          type: string
         company_id:
           type: string
           format: uuid
@@ -194,9 +212,11 @@ components:
         car_supply_at:
           type: string
           format: date-time
+          nullable: true
         car_supply_to:
           type: string
           format: date-time
+          nullable: true
 
     Driver:
       type: object
@@ -218,6 +238,8 @@ components:
         id:
           type: string
           format: UUID
+        human_friendly_id:
+          type: string
         type:
           type: string
           enum:
@@ -233,6 +255,37 @@ components:
           $ref: "#/components/schemas/ResourceRequirements"
         comment:
           type: string
+        route_segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteSegment'
+
+    RouteSegment:
+      type: object
+      properties:
+        id:
+          type: integer
+          nullable: false
+        from_route_point_id:
+          type: integer
+          nullable: false
+        to_route_point_id:
+          type: integer
+          nullable: false
+        distance:
+          type: number
+          nullable: false
+        loading:
+          type: object
+          properties:
+            duration:
+              type: integer
+        unloading:
+          type: object
+          properties:
+            duration:
+              type: integer
+
 
     ResourceRequirements:
       title: ResourceRequirements

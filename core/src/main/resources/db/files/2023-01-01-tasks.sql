@@ -13,6 +13,7 @@ create table if not exists tasks
     author     text        not null,
     story      jsonb       not null,
     transition timestamptz not null,
+    contacts   jsonb       not null,
     entity     jsonb       not null,
     payload    jsonb       not null,
 
