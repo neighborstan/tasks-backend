@@ -97,6 +97,9 @@ public class GenerateTasksUC {
                         ? TaskDto.Status.ACTIVE
                         : TaskDto.Status.PENDING;
 
+        var contacts =
+                List.of(new TaskDto.Contact("Роман Тест", TaskDto.Contact.Role.LOGIST, "+79062449434"));
+
         var assignments =
                 actors.stream()
                         .map(actor ->
@@ -115,7 +118,7 @@ public class GenerateTasksUC {
                                                 "tasks-service",
                                                 story,
                                                 min,
-                                                Collections.emptyList(),
+                                                contacts,
                                                 new PolymorphMap<>(raw),
                                                 new PolymorphMap<>(raw),
                                                 Objects.requireNonNullElse(info.getComment(), "")
@@ -166,7 +169,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(5),
-                                                    Collections.emptyList(),
+                                                    contacts,
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(point),
                                                     ""
@@ -179,7 +182,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(10),
-                                                    Collections.emptyList(),
+                                                    contacts,
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(point),
                                                     ""
@@ -192,7 +195,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(15),
-                                                    Collections.emptyList(),
+                                                    contacts,
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(point),
                                                     ""
@@ -205,7 +208,7 @@ public class GenerateTasksUC {
                                                     "tasks-service",
                                                     story,
                                                     time.plusMinutes(20),
-                                                    Collections.emptyList(),
+                                                    contacts,
                                                     new PolymorphMap<>(raw),
                                                     pointConverter.apiToCore(point),
                                                     ""
@@ -230,7 +233,7 @@ public class GenerateTasksUC {
                                         "tasks-service",
                                         story,
                                         max.plusMinutes(60),
-                                        Collections.emptyList(),
+                                        contacts,
                                         new PolymorphMap<>(raw),
                                         new PolymorphMap<>(raw),
                                         ""
