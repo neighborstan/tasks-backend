@@ -1,6 +1,7 @@
 package tech.saas.tasks.core.uc;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.exceptions.BadRequestException;
 import tech.saas.tasks.core.exceptions.ForbiddenException;
@@ -17,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class CompleteTasksUC {
@@ -31,7 +33,10 @@ public class CompleteTasksUC {
             throw new NotFoundException("задача не найдена");
 
         var task = exists.get();
+
+        log.info("task: {}; actor: {}", task.getId(), actor);
         var assignment = assignmentService.assignment(task.getId(), actor);
+
         if (assignment.isEmpty())
             throw new ForbiddenException("нет прав выполнять это задание. Вероятно, перевозка отменена");
 

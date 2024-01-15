@@ -18,6 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.util.WebUtils;
 import tech.saas.tasks.core.exceptions.BadRequestException;
+import tech.saas.tasks.core.exceptions.ForbiddenException;
 
 import java.net.URI;
 import java.util.Objects;
@@ -35,6 +36,17 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler i
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, String.valueOf(ex.getMessage())),
                 new HttpHeaders(),
                 HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public final ResponseEntity<Object> handleForbiddenException(ForbiddenException ex, WebRequest request) throws Exception {
+        return handleExceptionInternal(
+                ex,
+                ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, String.valueOf(ex.getMessage())),
+                new HttpHeaders(),
+                HttpStatus.FORBIDDEN,
                 request
         );
     }
