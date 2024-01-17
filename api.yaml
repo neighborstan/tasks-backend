@@ -175,6 +175,7 @@ components:
                 - in_way
                 - review
                 - not_approved
+                - approved
                 - done
                 - canceled
                 - canceled_by_transport_company
