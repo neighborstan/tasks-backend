@@ -173,6 +173,7 @@ components:
                 - resources_waiting
                 - trip_waiting
                 - in_way
+                - review
                 - done
                 - canceled
                 - canceled_by_transport_company
