@@ -97,8 +97,8 @@ public class GenerateTasksUC {
                         ? TaskDto.Status.ACTIVE
                         : TaskDto.Status.PENDING;
 
-        var contacts =
-                List.of(new TaskDto.Contact("Роман Тест", TaskDto.Contact.Role.LOGIST, "+79062449434"));
+        var contacts = List.<TaskDto.Contact>of();
+//                List.of(new TaskDto.Contact("Роман Тест", TaskDto.Contact.Role.LOGIST, "+79062449434"));
 
         var assignments =
                 actors.stream()
