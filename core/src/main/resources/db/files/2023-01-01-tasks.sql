@@ -1,8 +1,5 @@
 --liquibase formatted sql
---changeset durov:2023-01-01-tasks
-
-drop table assignment;
-drop table tasks;
+--changeset romeme:2023-01-01-tasks
 
 create table if not exists tasks
 (

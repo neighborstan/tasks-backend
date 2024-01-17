@@ -8,5 +8,6 @@
 
     <include file="files/2023-01-01-init.sql" relativeToChangelogFile="true"/>
     <include file="files/2023-01-01-tasks.sql" relativeToChangelogFile="true"/>
+    <include file="files/2024-01-10-actors-identity.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

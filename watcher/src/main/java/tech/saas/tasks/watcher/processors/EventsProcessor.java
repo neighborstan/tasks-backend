@@ -46,7 +46,8 @@ public class EventsProcessor {
                                     type = "topic"
                             ),
                             key = {
-//                                    "crud.shipping.create",
+                                    "crud.driver.create",
+                                    "crud.driver.update",
                                     "crud.shipping.update"
                             },
                             ignoreDeclarationExceptions = "true"
