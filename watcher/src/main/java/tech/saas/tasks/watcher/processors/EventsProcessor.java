@@ -58,22 +58,33 @@ public class EventsProcessor {
 
         var body = new String(message.getBody(), StandardCharsets.UTF_8);
         var event = mapper.readValue(body, new TypeReference<Map<String, ?>>() {});
-        var shipping = mapper.convertValue(event.get("payload"), Shipping.class);
-        var status = shipping.getStatus();
+        var props = message.getMessageProperties();
+        var key = props.getReceivedRoutingKey();
 
-        switch (status.getCodeName()) {
-            case DONE, APPROVAL_WAITING, RESOURCES_WAITING -> {
+        switch (key) {
+            case "crud.shipping.update":
+            {
+                var shipping = mapper.convertValue(event.get("payload"), Shipping.class);
+                var status = shipping.getStatus();
+
+                switch (status.getCodeName()) {
+                    case DONE, APPROVAL_WAITING, RESOURCES_WAITING -> {
+                    }
+
+                    case IN_WAY, TRIP_WAITING ->
+                            generateTasksUC.apply(shipping, mapper.convertValue(event.get("payload"), new TypeReference<Map<String, ?>>() {}));
+
+                    case CANCELED,
+                            CANCELED_BY_CARGO_OWNING_COMPANY,
+                            CANCELED_BY_TRANSPORT_COMPANY,
+                            FAILED_BY_CARGO_OWNING_COMPANY,
+                            FAILED_BY_TRANSPORT_COMPANY -> cancelTasksUC.apply(shipping);
+                }
             }
-
-            case IN_WAY, TRIP_WAITING ->
-                    generateTasksUC.apply(shipping, mapper.convertValue(event.get("payload"), new TypeReference<Map<String, ?>>() {}));
-
-            case CANCELED,
-                    CANCELED_BY_CARGO_OWNING_COMPANY,
-                    CANCELED_BY_TRANSPORT_COMPANY,
-                    FAILED_BY_CARGO_OWNING_COMPANY,
-                    FAILED_BY_TRANSPORT_COMPANY -> cancelTasksUC.apply(shipping);
+            break;
+            default: {}
         }
+
 
     }
 }
