@@ -45,23 +45,18 @@ public class ActorsService {
     }
 
     public ActorIdentityDto persist(ActorIdentityDto identity) {
-        try {
-            var map = new MapSqlParameterSource();
-            map.addValue("actor", identity.getActor());
-            map.addValue("id", identity.getId());
+        var map = new MapSqlParameterSource();
+        map.addValue("actor", identity.getActor());
+        map.addValue("id", identity.getId());
 
-            jdbc.update("""
+        jdbc.update("""
                             insert into identity(actor, id)
                             values (:actor, :id)
                             on conflict (actor, id) do nothing
                             """,
-                    map
-            );
+                map
+        );
 
-            return get(identity.getActor(), identity.getId()).orElseThrow();
-        }
-        catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        return get(identity.getActor(), identity.getId()).orElseThrow();
     }
 }
