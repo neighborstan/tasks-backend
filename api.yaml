@@ -174,6 +174,7 @@ components:
                 - trip_waiting
                 - in_way
                 - review
+                - not_approved
                 - done
                 - canceled
                 - canceled_by_transport_company
