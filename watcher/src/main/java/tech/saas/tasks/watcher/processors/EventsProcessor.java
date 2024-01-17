@@ -62,8 +62,7 @@ public class EventsProcessor {
         var key = props.getReceivedRoutingKey();
 
         switch (key) {
-            case "crud.shipping.update":
-            {
+            case "crud.shipping.update": {
                 var shipping = mapper.convertValue(event.get("payload"), Shipping.class);
                 var status = shipping.getStatus();
 
@@ -82,7 +81,8 @@ public class EventsProcessor {
                 }
             }
             break;
-            default: {}
+            default: {
+            }
         }
 
 
