@@ -66,6 +66,8 @@ components:
         id:
           type: string
           format: uuid
+        pipeline:
+          type: string
         author:
           type: string
         type:
