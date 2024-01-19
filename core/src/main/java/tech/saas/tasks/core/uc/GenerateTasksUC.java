@@ -49,8 +49,8 @@ public class GenerateTasksUC {
         if (!Objects.equals(request.getType(), ShippingRequest.TypeEnum.SHIPPING_REQUEST))
             return Collections.emptyList();
 
-        var status = shipping.getStatus();
-        if (!List.of(ShippingStatus.CodeNameEnum.TRIP_WAITING, ShippingStatus.CodeNameEnum.IN_WAY).contains(status.getCodeName()))
+        var shippingStatus = shipping.getStatus();
+        if (!List.of(ShippingStatus.CodeNameEnum.TRIP_WAITING, ShippingStatus.CodeNameEnum.IN_WAY).contains(shippingStatus.getCodeName()))
             return Collections.emptyList();
 
         var route =
