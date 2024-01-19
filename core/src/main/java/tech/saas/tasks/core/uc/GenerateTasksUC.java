@@ -8,6 +8,7 @@ import tech.saas.tasks.core.models.PolymorphMap;
 import tech.saas.tasks.core.models.SelectedCarSupply;
 import tech.saas.tasks.core.models.Shipping;
 import tech.saas.tasks.core.models.ShippingAssignedResourcesInner;
+import tech.saas.tasks.core.models.ShippingRequest;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
 import tech.saas.tasks.core.models.TaskDto;
 import tech.saas.tasks.core.models.TaskEntity;
@@ -43,6 +44,9 @@ public class GenerateTasksUC {
 
         var request =
                 shipping.getShippingRequestInfo();
+
+        if (!Objects.equals(request.getType(), ShippingRequest.TypeEnum.SHIPPING_REQUEST))
+            return Collections.emptyList();
 
         var route =
                 request.getRoutePoints();
