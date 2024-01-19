@@ -9,6 +9,7 @@ import tech.saas.tasks.core.models.SelectedCarSupply;
 import tech.saas.tasks.core.models.Shipping;
 import tech.saas.tasks.core.models.ShippingAssignedResourcesInner;
 import tech.saas.tasks.core.models.ShippingRequest;
+import tech.saas.tasks.core.models.ShippingStatus;
 import tech.saas.tasks.core.models.TaskAssignmentDto;
 import tech.saas.tasks.core.models.TaskDto;
 import tech.saas.tasks.core.models.TaskEntity;
@@ -46,6 +47,10 @@ public class GenerateTasksUC {
                 shipping.getShippingRequestInfo();
 
         if (!Objects.equals(request.getType(), ShippingRequest.TypeEnum.SHIPPING_REQUEST))
+            return Collections.emptyList();
+
+        var status = shipping.getStatus();
+        if (!List.of(ShippingStatus.CodeNameEnum.TRIP_WAITING, ShippingStatus.CodeNameEnum.IN_WAY).contains(status.getCodeName()))
             return Collections.emptyList();
 
         var route =
