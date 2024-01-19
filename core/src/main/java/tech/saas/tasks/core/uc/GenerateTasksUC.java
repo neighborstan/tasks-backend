@@ -166,12 +166,11 @@ public class GenerateTasksUC {
                 route.stream()
                         .flatMap(point -> {
                                     var location = point.getLocation();
-                                    var fias = location.getFiasId();
                                     var time = times.getOrDefault(point.getId(), OffsetDateTime.now(clock));
 
                                     return Stream.of(
                                             new TaskDto<TaskEntity, TaskPayload>(
-                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.MOVEMENT_START),
+                                                    uuidGen.gen(point.getId(), shipping.getId(), TaskDto.Type.MOVEMENT_START),
                                                     TaskDto.Type.MOVEMENT_START,
                                                     TaskDto.Status.ACTIVE,
                                                     String.valueOf(shipping.getId()),
@@ -184,7 +183,7 @@ public class GenerateTasksUC {
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
-                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.WAYPOINT_REACH),
+                                                    uuidGen.gen(point.getId(), shipping.getId(), TaskDto.Type.WAYPOINT_REACH),
                                                     TaskDto.Type.WAYPOINT_REACH,
                                                     TaskDto.Status.ACTIVE,
                                                     String.valueOf(shipping.getId()),
@@ -197,7 +196,7 @@ public class GenerateTasksUC {
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
-                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.DOCKING_START),
+                                                    uuidGen.gen(point.getId(), shipping.getId(), TaskDto.Type.DOCKING_START),
                                                     TaskDto.Type.DOCKING_START,
                                                     TaskDto.Status.ACTIVE,
                                                     String.valueOf(shipping.getId()),
@@ -210,7 +209,7 @@ public class GenerateTasksUC {
                                                     ""
                                             ),
                                             new TaskDto<TaskEntity, TaskPayload>(
-                                                    uuidGen.gen(fias, shipping.getId(), TaskDto.Type.DOCKING_END),
+                                                    uuidGen.gen(point.getId(), shipping.getId(), TaskDto.Type.DOCKING_END),
                                                     TaskDto.Type.DOCKING_END,
                                                     TaskDto.Status.ACTIVE,
                                                     String.valueOf(shipping.getId()),
