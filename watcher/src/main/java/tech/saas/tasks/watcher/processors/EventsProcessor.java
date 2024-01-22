@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import tech.saas.tasks.core.models.Author;
 import tech.saas.tasks.core.models.Shipping;
 import tech.saas.tasks.core.uc.CancelTasksUC;
 import tech.saas.tasks.core.uc.GenerateTasksUC;
@@ -60,6 +61,7 @@ public class EventsProcessor {
         var event = mapper.readValue(body, new TypeReference<Map<String, ?>>() {});
         var props = message.getMessageProperties();
         var key = props.getReceivedRoutingKey();
+        var author = mapper.convertValue(event.get("author"), Author.class);
 
         switch (key) {
             case "crud.shipping.update": {
@@ -70,8 +72,11 @@ public class EventsProcessor {
                     case DONE, APPROVAL_WAITING, RESOURCES_WAITING -> {
                     }
 
-                    case IN_WAY, TRIP_WAITING ->
-                            generateTasksUC.apply(shipping, mapper.convertValue(event.get("payload"), new TypeReference<Map<String, ?>>() {}));
+                    case IN_WAY, TRIP_WAITING -> generateTasksUC.apply(
+                            shipping,
+                            mapper.convertValue(event.get("payload"), new TypeReference<Map<String, ?>>() {}),
+                            author
+                    );
 
                     case CANCELED,
                             CANCELED_BY_CARGO_OWNING_COMPANY,

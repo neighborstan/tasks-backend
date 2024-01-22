@@ -234,6 +234,24 @@ components:
               items:
                 type: string
 
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        phone:
+          type: string
+        full_name:
+          type: string
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+
     ShippingRequest:
       type: object
       properties:

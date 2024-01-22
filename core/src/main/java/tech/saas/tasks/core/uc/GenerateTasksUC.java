@@ -1,9 +1,9 @@
 package tech.saas.tasks.core.uc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.converters.PointConverter;
+import tech.saas.tasks.core.models.Author;
 import tech.saas.tasks.core.models.PolymorphMap;
 import tech.saas.tasks.core.models.SelectedCarSupply;
 import tech.saas.tasks.core.models.Shipping;
@@ -16,6 +16,7 @@ import tech.saas.tasks.core.models.TaskEntity;
 import tech.saas.tasks.core.models.TaskPayload;
 import tech.saas.tasks.core.services.AssignmentService;
 import tech.saas.tasks.core.services.CoreService;
+import tech.saas.tasks.core.services.PeopleService;
 import tech.saas.tasks.core.services.TasksService;
 import tech.saas.tasks.core.services.UUIDGen;
 
@@ -26,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,15 +35,17 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class GenerateTasksUC {
 
-    private final PointConverter pointConverter;
-    private final TasksService tasksService;
-    private final AssignmentService assignmentService;
-    private final CoreService coreService;
     private final UUIDGen uuidGen;
     private final Clock clock;
-    private final ObjectMapper mapper;
 
-    public List<TaskDto<?, ?>> apply(Shipping shipping, Map<String, ?> raw) {
+    private final PointConverter pointConverter;
+
+    private final CoreService coreService;
+    private final TasksService tasksService;
+    private final PeopleService peopleService;
+    private final AssignmentService assignmentService;
+
+    public List<TaskDto<?, ?>> apply(Shipping shipping, Map<String, ?> raw, Author author) {
 
         var request =
                 shipping.getShippingRequestInfo();
@@ -105,9 +109,19 @@ public class GenerateTasksUC {
                 min.isBefore(barrier)
                         ? TaskDto.Status.ACTIVE
                         : TaskDto.Status.PENDING;
-
-        var contacts = List.<TaskDto.Contact>of();
-//                List.of(new TaskDto.Contact("Роман Тест", TaskDto.Contact.Role.LOGIST, "+79062449434"));
+        var contacts =
+                Stream.concat(
+                                tasksService.pipeline(String.valueOf(shipping.getId()))
+                                        .stream()
+                                        .map(TaskDto::getContacts)
+                                        .flatMap(List::stream),
+                                Optional.ofNullable(author)
+                                        .flatMap(a -> peopleService.user(a.getId()))
+                                        .filter(u -> Objects.nonNull(u.getPhone()))
+                                        .map(u -> new TaskDto.Contact(u.getFullName(), TaskDto.Contact.Role.LOGIST, u.getPhone()))
+                                        .stream()
+                        )
+                        .toList();
 
         var assignments =
                 actors.stream()
