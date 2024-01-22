@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 
-@Service
 @Slf4j
+@Service
 public class CoreService {
 
     private final String uri;

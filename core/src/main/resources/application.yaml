@@ -21,3 +21,6 @@ services:
   core:
     url: https://core.demo.traffic.online
     token: '{"user_id":"4fe0e967-19c5-4c99-9221-79d5da849646","roles":["admin"]}'
+  people:
+    url: https://people.demo.traffic.online
+    token: '{"user_id":"4fe0e967-19c5-4c99-9221-79d5da849646","roles":["admin"]}'
