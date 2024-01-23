@@ -14,6 +14,7 @@ import tech.saas.tasks.core.exceptions.BadRequestException;
 import tech.saas.tasks.core.models.Driver;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -37,7 +38,7 @@ public class CoreService {
         this.rest = rest;
     }
 
-    public Driver driver(UUID company, UUID id) {
+    public Optional<Driver> driver(UUID company, UUID id) {
 
         try {
             var headers = new HttpHeaders();
@@ -54,11 +55,9 @@ public class CoreService {
 
             switch (status) {
                 case OK:
-                    return mapper.readValue(response.getBody(), Driver.class);
-                case BAD_REQUEST:
-                    throw new BadRequestException(String.format("response %s; body:%s", status, response.getBody()));
+                    return Optional.of(mapper.readValue(response.getBody(), Driver.class));
                 default:
-                    throw new RuntimeException(String.format("response %s; body:%s", status, response.getBody()));
+                    return Optional.empty();
             }
         }
         catch (IOException ex) {

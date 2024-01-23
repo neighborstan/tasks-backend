@@ -68,6 +68,7 @@ public class GenerateTasksUC {
                                 resources.stream()
                                         .flatMap(i -> i.getDriversIds().stream())
                                         .map(d -> coreService.driver(shipping.getCompanyId(), d))
+                                        .flatMap(Optional::stream)
                                         .flatMap(d ->
                                                 d.getDriverSecretInfo().getPhones()
                                                         .stream()
