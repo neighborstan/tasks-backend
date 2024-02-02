@@ -84,6 +84,7 @@ public class GenerateTasksUC {
                         new TaskDto.Story(
                                 "tasks-service",
                                 TaskDto.Status.ACTIVE,
+                                "online",
                                 OffsetDateTime.now(clock)
                         )
                 );

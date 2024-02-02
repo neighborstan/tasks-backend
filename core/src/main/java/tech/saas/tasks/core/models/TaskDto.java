@@ -54,8 +54,8 @@ public class TaskDto<E extends TaskEntity, P extends TaskPayload> {
 
         private String author;
         private Status status;
+        private String mode;
         private OffsetDateTime instant;
-
 
     }
 

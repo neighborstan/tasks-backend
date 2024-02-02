@@ -28,13 +28,14 @@ public class TasksController implements TasksApi {
 
 
     @PreAuthorize("hasAuthority('SCOPE_driver')")
-    public ResponseEntity<Task> completeTask(UUID id, OffsetDateTime instant) {
+    public ResponseEntity<Task> completeTask(UUID id, OffsetDateTime instant,  String mode) {
         var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         var jwt = auth.getToken();
         var phone = jwt.getClaimAsString("phone");
 
-        return ResponseEntity.ok(tasksConverter.coreToApi(completeTasksUC.apply(phone, id, instant)));
+        return ResponseEntity.ok(tasksConverter.coreToApi(completeTasksUC.apply(phone, id, mode, instant)));
     }
+
 
     @Override
     @PreAuthorize("hasAuthority('SCOPE_driver')")

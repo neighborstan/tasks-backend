@@ -27,7 +27,7 @@ public class CancelTasksUC {
 
             task.setStatus(TaskDto.Status.CANCELED);
             var story = task.getStory();
-            story.add(new TaskDto.Story("tasks-service", TaskDto.Status.CANCELED, OffsetDateTime.now(clock)));
+            story.add(new TaskDto.Story("tasks-service", TaskDto.Status.CANCELED, "online", OffsetDateTime.now(clock)));
             task.setStory(story);
             tasksService.persist(task);
 

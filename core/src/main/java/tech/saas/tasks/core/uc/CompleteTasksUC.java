@@ -27,7 +27,11 @@ public class CompleteTasksUC {
     private final TasksService tasksService;
     private final AssignmentService assignmentService;
 
-    public TaskDto<? extends TaskEntity, ? extends TaskPayload> apply(String actor, UUID id, OffsetDateTime instant) {
+    public TaskDto<? extends TaskEntity, ? extends TaskPayload> apply(
+            String actor,
+            UUID id,
+            String mode,
+            OffsetDateTime instant) {
         var exists = tasksService.get(id);
         if (exists.isEmpty())
             throw new NotFoundException("задача не найдена");
@@ -47,7 +51,7 @@ public class CompleteTasksUC {
         if (story.stream().anyMatch(s -> Objects.equals(s.getAuthor(), actor) && Objects.equals(s.getStatus(), TaskDto.Status.DONE)))
             return task;
 
-        story.add(new TaskDto.Story(actor, TaskDto.Status.DONE, instant));
+        story.add(new TaskDto.Story(actor, TaskDto.Status.DONE, mode, instant));
         task.setStory(story);
         task.setStatus(TaskDto.Status.DONE);
         tasksService.persist(task);
