@@ -32,13 +32,15 @@ public class CompleteTasksUC {
             UUID id,
             String mode,
             OffsetDateTime instant) {
+        log.info("actor: {}; id: {}; mode: {}; instant: {}", actor, id, mode, instant);
+
         var exists = tasksService.get(id);
         if (exists.isEmpty())
             throw new NotFoundException("задача не найдена");
 
         var task = exists.get();
 
-        log.info("task: {}; actor: {}", task.getId(), actor);
+
         var assignment = assignmentService.assignment(task.getId(), actor);
 
         if (assignment.isEmpty())
