@@ -54,6 +54,8 @@ paths:
           in: query
           required: true
           schema:
+            type: string
+            default: online
             enum:
               - online
               - offline
