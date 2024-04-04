@@ -5,11 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Argument;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import tech.saas.tasks.core.models.Author;
 import tech.saas.tasks.core.models.Shipping;
@@ -69,7 +65,7 @@ public class EventsProcessor {
                 var status = shipping.getStatus();
 
                 switch (status.getCodeName()) {
-                    case DONE, APPROVAL_WAITING, RESOURCES_WAITING -> {
+                    case APPROVAL_WAITING, RESOURCES_WAITING -> {
                     }
 
                     case IN_WAY, TRIP_WAITING -> generateTasksUC.apply(
@@ -78,7 +74,8 @@ public class EventsProcessor {
                             author
                     );
 
-                    case CANCELED,
+                    case DONE,
+                            CANCELED,
                             CANCELED_BY_CARGO_OWNING_COMPANY,
                             CANCELED_BY_TRANSPORT_COMPANY,
                             FAILED_BY_CARGO_OWNING_COMPANY,

@@ -1050,7 +1050,7 @@ components:
           * `tanker` - цистерна
           * `container` - контейнеровоз
       type: string
-      enum: [ awning, full_metal, isothermal, refrigerator, dropside, tanker, container ]
+      enum: [ awning, full_metal, isothermal, refrigerator, dropside, tanker, container, timber_carrier, step_deck ]
 
     RoutePointOperations:
       description: Виды работ в точке маршрута
